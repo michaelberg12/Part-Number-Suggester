@@ -6,8 +6,16 @@ Part::Part(std::string part_name, std::string part_id, std::string part_rev, std
 	_part_id = part_id;
 	_part_rev = part_rev;
 	_part_desc = part_desc;
+}
 
-
+Part::Part(std::string part_name, std::string part_id, std::string part_rev, std::string part_desc, GtkTreeStore* store, GtkTreeIter* iter)
+{
+	_part_name = part_name;
+	_part_id = part_id;
+	_part_rev = part_rev;
+	_part_desc = part_desc;
+	_iter = iter;
+	_store = store;
 }
 
 void Part::part_list_append(GtkTreeStore* store, GtkTreeIter *iter)

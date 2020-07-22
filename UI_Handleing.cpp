@@ -3,6 +3,12 @@
 GtkWidget* UI_Handleing::_part_window;
 GtkWidget* UI_Handleing::_main_window;
 
+GtkTreeSelection* UI_Handleing::select;
+
+GList* UI_Handleing::list;
+GtkTreeStore* UI_Handleing::store;
+std::vector<Part> UI_Handleing::selected_part_list;
+
 UI_Handleing::UI_Handleing(int argc, char* argv[])
 {
 	gtk_init(&argc, &argv);
@@ -38,9 +44,11 @@ void UI_Handleing::_new_main_window()
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), delete_part);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), configure_files);
 
-
 	GtkWidget* part_list = gtk_tree_view_new();
 	gtk_tree_view_set_grid_lines(GTK_TREE_VIEW(part_list), GTK_TREE_VIEW_GRID_LINES_BOTH);
+	select = gtk_tree_view_get_selection(GTK_TREE_VIEW(part_list));
+	gtk_tree_selection_set_mode(select, GTK_SELECTION_MULTIPLE);
+	g_signal_connect(G_OBJECT(select), "changed", G_CALLBACK(_selection_changed),NULL);
 	gtk_container_add(GTK_CONTAINER(scrollable_list), part_list);
 
 	g_signal_connect(_main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -103,7 +111,7 @@ void UI_Handleing::_new_main_menu(GtkWidget* list)
 	column = gtk_tree_view_column_new_with_attributes("Description", renderer, "text", DESC, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
-	GtkTreeStore* store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(store));
 	g_object_unref(store);
@@ -129,4 +137,22 @@ void UI_Handleing::_new_main_menu(GtkWidget* list)
 void UI_Handleing::_part_number_confirm(GtkButton* button, gpointer user_data)
 {
 	gtk_main_quit();
+}
+
+void UI_Handleing::_selection_changed(GtkTreeSelection* selection, gpointer data)
+{
+	GtkTreeIter iter;
+	selected_part_list.clear();
+	g_list_free_full(list, (GDestroyNotify)gtk_tree_path_free);
+	list = gtk_tree_selection_get_selected_rows(selection, NULL);
+	printf("Selected: %d Elements\n", g_list_length(list));
+	for (GList* a1 = list; a1 != NULL; a1 = a1->next)
+	{
+		GtkTreePath* indv_row = (GtkTreePath *)(a1->data);
+		gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, indv_row);
+		gchar* part_name, *part_id, *part_rev, *part_desc;
+		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
+		//g_print("%s %s %s %s\n", part_name, part_id, part_rev, part_desc);
+		selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, store, &iter));
+	}
 }
