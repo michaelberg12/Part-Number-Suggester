@@ -21,9 +21,21 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="file_interfacer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="part.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UI_Handleing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="file_interfacer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="part.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

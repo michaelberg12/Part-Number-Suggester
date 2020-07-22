@@ -139,10 +139,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="file_interfacer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="part.cpp" />
     <ClCompile Include="UI_Handleing.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="file_interfacer.h" />
+    <ClInclude Include="part.h" />
     <ClInclude Include="UI_Handleing.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
