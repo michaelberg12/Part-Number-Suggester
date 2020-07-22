@@ -18,6 +18,7 @@ private:
 	static GList* list;
 	static GtkTreeStore* store;
 	static std::vector<Part> selected_part_list;
+	static bool _selection_disable_flag;
 
 	static GtkTreeSelection* select;
 
@@ -33,4 +34,8 @@ private:
 
 	static void _part_number_confirm(GtkButton* button, gpointer user_data);
 	static void _selection_changed(GtkTreeSelection* selection, gpointer data);
+
+	static void _new_menu_item(GtkMenuItem* menuitem, gpointer user_data);
+	static void _delete_menu_item(GtkMenuItem* menuitem, gpointer user_data);
+	static void _config_menu_item(GtkMenuItem* menuitem, gpointer user_data);
 };

@@ -9,6 +9,8 @@ GList* UI_Handleing::list;
 GtkTreeStore* UI_Handleing::store;
 std::vector<Part> UI_Handleing::selected_part_list;
 
+bool UI_Handleing::_selection_disable_flag = false;
+
 UI_Handleing::UI_Handleing(int argc, char* argv[])
 {
 	gtk_init(&argc, &argv);
@@ -43,6 +45,9 @@ void UI_Handleing::_new_main_window()
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), new_part);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), delete_part);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), configure_files);
+	g_signal_connect(G_OBJECT(new_part), "activate", G_CALLBACK(_new_menu_item), NULL);
+	g_signal_connect(G_OBJECT(delete_part), "activate", G_CALLBACK(_delete_menu_item), NULL);
+	g_signal_connect(G_OBJECT(configure_files), "activate", G_CALLBACK(_config_menu_item), NULL);
 
 	GtkWidget* part_list = gtk_tree_view_new();
 	gtk_tree_view_set_grid_lines(GTK_TREE_VIEW(part_list), GTK_TREE_VIEW_GRID_LINES_BOTH);
@@ -141,18 +146,49 @@ void UI_Handleing::_part_number_confirm(GtkButton* button, gpointer user_data)
 
 void UI_Handleing::_selection_changed(GtkTreeSelection* selection, gpointer data)
 {
-	GtkTreeIter iter;
-	selected_part_list.clear();
-	g_list_free_full(list, (GDestroyNotify)gtk_tree_path_free);
-	list = gtk_tree_selection_get_selected_rows(selection, NULL);
-	printf("Selected: %d Elements\n", g_list_length(list));
-	for (GList* a1 = list; a1 != NULL; a1 = a1->next)
-	{
-		GtkTreePath* indv_row = (GtkTreePath *)(a1->data);
-		gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, indv_row);
-		gchar* part_name, *part_id, *part_rev, *part_desc;
-		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
-		//g_print("%s %s %s %s\n", part_name, part_id, part_rev, part_desc);
-		selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, store, &iter));
+	if (!_selection_disable_flag) {
+		GtkTreeIter iter;
+		selected_part_list.clear();
+		g_list_free_full(list, (GDestroyNotify)gtk_tree_path_free);
+		list = gtk_tree_selection_get_selected_rows(selection, NULL);
+		printf("Selected: %d Elements\n", g_list_length(list));
+		for (GList* a1 = list; a1 != NULL; a1 = a1->next)
+		{
+			GtkTreePath* indv_row = (GtkTreePath*)(a1->data);
+			gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, indv_row);
+			gchar* part_name, * part_id, * part_rev, * part_desc;
+			gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
+			g_print("%s %s %s %s\n", part_name, part_id, part_rev, part_desc);
+			selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, gtk_tree_row_reference_new(GTK_TREE_MODEL(store), indv_row)));
+		}
 	}
+}
+
+void UI_Handleing::_new_menu_item(GtkMenuItem* menuitem, gpointer user_data)
+{
+	g_print("New signal triggered\n");
+}
+
+void UI_Handleing::_delete_menu_item(GtkMenuItem* menuitem, gpointer user_data)
+{
+	_selection_disable_flag = true;
+	g_print("Delete signal triggered\n\n");
+	for(auto indv_part: selected_part_list) {
+		GtkTreeIter iter;
+		gchar* part_name, * part_id, * part_rev, * part_desc;
+		
+		GtkTreePath* indv_row = gtk_tree_row_reference_get_path(indv_part.row_ref());
+		gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, indv_row);
+
+		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
+		g_print("Deleting: %s %s %s %s, %d\n", part_name, part_id, part_rev, part_desc, selected_part_list.size());
+
+		gtk_tree_store_remove(store, &iter);
+	}
+	_selection_disable_flag = false;
+}
+
+void UI_Handleing::_config_menu_item(GtkMenuItem* menuitem, gpointer user_data)
+{
+	g_print("Config signal triggered\n");
 }
