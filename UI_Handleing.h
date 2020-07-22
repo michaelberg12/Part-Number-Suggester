@@ -6,6 +6,8 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+#include "Part.h"
+
 class UI_Handleing
 {
 public:
@@ -19,6 +21,7 @@ private:
 	void _new_part_window();
 	void _new_main_window();
 
+	void _part_legend(GtkWidget* legend_box);
 	void _new_part_creation_menu(GtkWidget* grid);
 	void _new_main_menu(GtkWidget* grid);
 

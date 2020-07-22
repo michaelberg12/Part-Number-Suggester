@@ -24,7 +24,7 @@
     <ClCompile Include="file_interfacer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="part.cpp">
+    <ClCompile Include="Part.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +35,7 @@
     <ClInclude Include="file_interfacer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="part.h">
+    <ClInclude Include="Part.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
