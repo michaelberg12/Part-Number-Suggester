@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <time.h> 
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -15,12 +16,12 @@ class UI_Handleing
 public:
 	UI_Handleing(int argc, char* argv[]);
 private:
-	static GList* list;
-	static GtkTreeStore* store;
-	static std::vector<Part> selected_part_list;
+	static GList* _list;
+	static GtkTreeStore* _store_parts;
+	static std::vector<Part> _selected_part_list;
 	static bool _selection_disable_flag;
 
-	static GtkTreeSelection* select;
+	static GtkTreeSelection* _select;
 
 	static GtkWidget* _part_window;
 	static GtkWidget* _main_window;

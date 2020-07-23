@@ -6,11 +6,11 @@ GtkWidget* UI_Handleing::_main_window;
 GtkWidget* UI_Handleing::_part_name_input;
 GtkWidget* UI_Handleing::_part_desc_input;
 
-GtkTreeSelection* UI_Handleing::select;
+GtkTreeSelection* UI_Handleing::_select;
 
-GList* UI_Handleing::list;
-GtkTreeStore* UI_Handleing::store;
-std::vector<Part> UI_Handleing::selected_part_list;
+GList* UI_Handleing::_list;
+GtkTreeStore* UI_Handleing::_store_parts;
+std::vector<Part> UI_Handleing::_selected_part_list;
 
 bool UI_Handleing::_selection_disable_flag = false;
 
@@ -19,6 +19,8 @@ Part UI_Handleing::_new_part("","","A","");
 UI_Handleing::UI_Handleing(int argc, char* argv[])
 {
 	gtk_init(&argc, &argv);
+
+	srand(time(0));
 
 	_window_creation();
 	_new_main_window();
@@ -57,9 +59,9 @@ void UI_Handleing::_new_main_window()
 
 	GtkWidget* part_list = gtk_tree_view_new();
 	gtk_tree_view_set_grid_lines(GTK_TREE_VIEW(part_list), GTK_TREE_VIEW_GRID_LINES_BOTH);
-	select = gtk_tree_view_get_selection(GTK_TREE_VIEW(part_list));
-	gtk_tree_selection_set_mode(select, GTK_SELECTION_MULTIPLE);
-	g_signal_connect(G_OBJECT(select), "changed", G_CALLBACK(_selection_changed),NULL);
+	_select = gtk_tree_view_get_selection(GTK_TREE_VIEW(part_list));
+	gtk_tree_selection_set_mode(_select, GTK_SELECTION_MULTIPLE);
+	g_signal_connect(G_OBJECT(_select), "changed", G_CALLBACK(_selection_changed),NULL);
 	gtk_container_add(GTK_CONTAINER(scrollable_list), part_list);
 
 	g_signal_connect(_main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -84,6 +86,9 @@ void UI_Handleing::_new_part_window()
 	gtk_window_set_default_size(GTK_WINDOW(_part_window), 300, 400);
 	gtk_window_set_resizable(GTK_WINDOW(_part_window), FALSE);
 	gtk_window_set_title(GTK_WINDOW(_part_window), "Part Number Manager");
+
+	gtk_window_set_transient_for(GTK_WINDOW(_part_window), GTK_WINDOW(_main_window));
+	gtk_window_set_destroy_with_parent(GTK_WINDOW(_part_window), TRUE);
 }
 
 void UI_Handleing::_new_part_creation_menu(GtkWidget* vertical_box)
@@ -148,10 +153,10 @@ void UI_Handleing::_new_main_menu(GtkWidget* list)
 	column = gtk_tree_view_column_new_with_attributes("Description", renderer, "text", DESC, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
-	store = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	_store_parts = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
-	gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(store));
-	g_object_unref(store);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(_store_parts));
+	g_object_unref(_store_parts);
 
 	GtkTreeIter iter;
 
@@ -165,7 +170,7 @@ void UI_Handleing::_new_main_menu(GtkWidget* list)
 
 		Part default_part("Builder", part_number,  std::string(1, (char)(rand() % 26 + 65)), "Sample Text");
 
-		default_part.part_list_append(store, &iter);
+		default_part.part_list_append(_store_parts, &iter);
 	}
 	//=========================================================================================
 
@@ -176,7 +181,7 @@ void UI_Handleing::_part_number_confirm(GtkButton* button, gpointer user_data)
 	_new_part = Part(gtk_entry_get_text(GTK_ENTRY(_part_name_input)), _new_part.id(), "A", gtk_entry_get_text(GTK_ENTRY(_part_desc_input)));
 
 	GtkTreeIter iter;
-	_new_part.part_list_append(GTK_TREE_STORE(store), &iter);
+	_new_part.part_list_append(GTK_TREE_STORE(_store_parts), &iter);
 	gtk_widget_hide(_part_window);
 
 	std::string part_number;
@@ -189,11 +194,11 @@ void UI_Handleing::_part_number_confirm(GtkButton* button, gpointer user_data)
 		part_number.insert(2, std::string(1, (char)(rand() % 26 + 65)));
 		_new_part = Part(_new_part.name(), part_number, _new_part.rev(), _new_part.desc());
 
-		bool valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
+		bool valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(_store_parts), &iter);
 		repeat_flag = false;
 		while (valid) {
 			gchar* str_data;
-			gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, ID, &str_data, -1);
+			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, ID, &str_data, -1);
 
 			if (part_number == std::string(str_data)) {
 				repeat_flag = true;
@@ -201,7 +206,7 @@ void UI_Handleing::_part_number_confirm(GtkButton* button, gpointer user_data)
 			}
 
 			g_free(str_data);
-			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
+			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(_store_parts), &iter);
 		}
 	}
 
@@ -214,18 +219,18 @@ void UI_Handleing::_selection_changed(GtkTreeSelection* selection, gpointer data
 {
 	if (!_selection_disable_flag) {
 		GtkTreeIter iter;
-		selected_part_list.clear();
-		g_list_free_full(list, (GDestroyNotify)gtk_tree_path_free);
-		list = gtk_tree_selection_get_selected_rows(selection, NULL);
-		printf("Selected: %d Elements\n", g_list_length(list));
-		for (GList* a1 = list; a1 != NULL; a1 = a1->next)
+		_selected_part_list.clear();
+		g_list_free_full(_list, (GDestroyNotify)gtk_tree_path_free);
+		_list = gtk_tree_selection_get_selected_rows(selection, NULL);
+		printf("Selected: %d Elements\n", g_list_length(_list));
+		for (GList* a1 = _list; a1 != NULL; a1 = a1->next)
 		{
 			GtkTreePath* indv_row = (GtkTreePath*)(a1->data);
-			gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, indv_row);
+			gtk_tree_model_get_iter(GTK_TREE_MODEL(_store_parts), &iter, indv_row);
 			gchar* part_name, * part_id, * part_rev, * part_desc;
-			gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
+			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
 			g_print("%s %s %s %s\n", part_name, part_id, part_rev, part_desc);
-			selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, gtk_tree_row_reference_new(GTK_TREE_MODEL(store), indv_row)));
+			_selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, gtk_tree_row_reference_new(GTK_TREE_MODEL(_store_parts), indv_row)));
 		}
 	}
 }
@@ -243,21 +248,19 @@ void UI_Handleing::_generate_new_part_number(GtkButton* button, gpointer user_da
 		_new_part = Part(_new_part.name(), part_number, _new_part.rev(), _new_part.desc());
 
 		GtkTreeIter iter;
-		bool valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
+		bool valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(_store_parts), &iter);
 		repeat_flag = false;
 		while (valid) {
 			gchar* str_data;
-			gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, ID, &str_data, -1);
+			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, ID, &str_data, -1);
 
-			g_print("%s\n", part_number.c_str());
 			if (part_number == std::string(str_data)) {
-				g_print("%s\n", str_data);
 				repeat_flag = true;
 				break;
 			}
 
 			g_free(str_data);
-			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
+			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(_store_parts), &iter);
 		}
 	}
 	
@@ -276,17 +279,17 @@ void UI_Handleing::_delete_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 {
 	_selection_disable_flag = true;
 	g_print("Delete signal triggered\n\n");
-	for(auto indv_part: selected_part_list) {
+	for(auto indv_part: _selected_part_list) {
 		GtkTreeIter iter;
 		gchar* part_name, * part_id, * part_rev, * part_desc;
 		
 		GtkTreePath* indv_row = gtk_tree_row_reference_get_path(indv_part.row_ref());
-		gtk_tree_model_get_iter(GTK_TREE_MODEL(store), &iter, indv_row);
+		gtk_tree_model_get_iter(GTK_TREE_MODEL(_store_parts), &iter, indv_row);
 
-		gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
-		g_print("Deleting: %s %s %s %s, %d\n", part_name, part_id, part_rev, part_desc, selected_part_list.size());
+		gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
+		g_print("Deleting: %s %s %s %s, %d\n", part_name, part_id, part_rev, part_desc, _selected_part_list.size());
 
-		gtk_tree_store_remove(store, &iter);
+		gtk_tree_store_remove(_store_parts, &iter);
 	}
 	_selection_disable_flag = false;
 
