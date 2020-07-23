@@ -2,6 +2,7 @@
 #include <string>
 #include <cairo.h>
 #include <gtk/gtk.h>
+
 enum {
 	NAME,
 	ID,
@@ -17,6 +18,11 @@ public:
 	Part(std::string part_name, std::string part_id, std::string part_rev, std::string part_desc);
 	//for tracking selected parts
 	Part(std::string part_name, std::string part_id, std::string part_rev, std::string part_desc, GtkTreeRowReference* row_reference);
+
+	std::string name();
+	std::string id();
+	std::string rev();
+	std::string desc();
 
 	void part_list_append(GtkTreeStore* store, GtkTreeIter *iter);
 

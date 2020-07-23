@@ -25,6 +25,12 @@ private:
 	static GtkWidget* _part_window;
 	static GtkWidget* _main_window;
 
+	//remove these as soon as possible
+	static GtkWidget* _part_name_input;
+	static GtkWidget* _part_desc_input;
+
+	static Part _new_part;
+
 	void _window_creation();
 	void _new_main_window();
 

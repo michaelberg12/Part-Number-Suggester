@@ -17,6 +17,26 @@ Part::Part(std::string part_name, std::string part_id, std::string part_rev, std
 	_row_reference = row_reference;
 }
 
+std::string Part::name()
+{
+	return _part_name;
+}
+
+std::string Part::id()
+{
+	return _part_id;
+}
+
+std::string Part::rev()
+{
+	return _part_rev;
+}
+
+std::string Part::desc()
+{
+	return _part_desc;
+}
+
 void Part::part_list_append(GtkTreeStore* store, GtkTreeIter *iter)
 {
 	gtk_tree_store_append(store, iter, NULL);
