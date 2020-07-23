@@ -82,11 +82,19 @@ void UI_Handleing::_new_part_window()
 
 void UI_Handleing::_new_part_creation_menu(GtkWidget* vertical_box)
 {
+	std::string part_number;
+	for (int a2 = 0; a2 < 5; a2++) {
+		part_number.append(std::to_string(rand() % 8 + 1));
+	}
+	part_number.insert(2, std::string(1, (char)(rand() % 26 + 65)));
+
+	part_number.insert(0, "<span size=\"50000\">");
+	part_number.append("</span>");
 	//============================= part number ui elements ===================================
 	GtkWidget* part_number_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	GtkWidget* part_number_label = gtk_label_new("");
 	GtkWidget* part_number_frame = gtk_frame_new("Part Number");
-	gtk_label_set_markup(GTK_LABEL(part_number_label), "<span size=\"50000\">11A111</span>");
+	gtk_label_set_markup(GTK_LABEL(part_number_label), part_number.c_str());
 	gtk_container_add(GTK_CONTAINER(part_number_frame), part_number_label);
 	gtk_frame_set_label_align(GTK_FRAME(part_number_frame), 0.1, 0.5);
 	//gtk_box_pack_start(GTK_BOX(show_lidar_pos), label_show_lidar_pos, TRUE, FALSE, 20);
@@ -102,6 +110,7 @@ void UI_Handleing::_new_part_creation_menu(GtkWidget* vertical_box)
 	gtk_box_pack_end(GTK_BOX(vertical_box), confirm_box, FALSE, FALSE, 10);
 
 	g_signal_connect(G_OBJECT(number_confirm), "clicked", G_CALLBACK(_part_number_confirm), NULL);
+	g_signal_connect(G_OBJECT(generate_new), "clicked", G_CALLBACK(_generate_new_part_number), part_number_label);
 }
 
 void UI_Handleing::_new_main_menu(GtkWidget* list)
@@ -162,6 +171,20 @@ void UI_Handleing::_selection_changed(GtkTreeSelection* selection, gpointer data
 			selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, gtk_tree_row_reference_new(GTK_TREE_MODEL(store), indv_row)));
 		}
 	}
+}
+
+void UI_Handleing::_generate_new_part_number(GtkButton* button, gpointer user_data)
+{
+	GtkWidget* part_number_label = (GtkWidget*)(user_data);
+	std::string part_number;
+	for (int a2 = 0; a2 < 5; a2++) {
+		part_number.append(std::to_string(rand() % 8 + 1));
+	}
+	part_number.insert(2, std::string(1, (char)(rand() % 26 + 65)));
+
+	part_number.insert(0, "<span size=\"50000\">");
+	part_number.append("</span>");
+	gtk_label_set_markup(GTK_LABEL(part_number_label), part_number.c_str());
 }
 
 void UI_Handleing::_new_menu_item(GtkMenuItem* menuitem, gpointer user_data)

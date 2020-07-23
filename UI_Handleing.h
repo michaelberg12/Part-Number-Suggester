@@ -33,6 +33,7 @@ private:
 
 	static void _part_number_confirm(GtkButton* button, gpointer user_data);
 	static void _selection_changed(GtkTreeSelection* selection, gpointer data);
+	static void _generate_new_part_number(GtkButton* button, gpointer user_data);
 
 	static void _new_menu_item(GtkMenuItem* menuitem, gpointer user_data);
 	static void _delete_menu_item(GtkMenuItem* menuitem, gpointer user_data);
