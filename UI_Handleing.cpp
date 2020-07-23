@@ -25,7 +25,7 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 
 void UI_Handleing::_window_creation()
 {
-	//_part_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	_part_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	_main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 }
 
@@ -167,6 +167,8 @@ void UI_Handleing::_selection_changed(GtkTreeSelection* selection, gpointer data
 void UI_Handleing::_new_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 {
 	g_print("New signal triggered\n");
+	_new_part_window();
+	gtk_widget_show_all(_part_window);
 }
 
 void UI_Handleing::_delete_menu_item(GtkMenuItem* menuitem, gpointer user_data)
@@ -186,6 +188,7 @@ void UI_Handleing::_delete_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 		gtk_tree_store_remove(store, &iter);
 	}
 	_selection_disable_flag = false;
+
 }
 
 void UI_Handleing::_config_menu_item(GtkMenuItem* menuitem, gpointer user_data)
