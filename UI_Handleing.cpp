@@ -20,6 +20,8 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 {
 	gtk_init(&argc, &argv);
 
+	File_Interfacer gen();
+
 	srand(time(0));
 
 	_window_creation();
