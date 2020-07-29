@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="saveFiles">
+      <UniqueIdentifier>{1ee07eac-641d-49d3-b281-352ca7332f00}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UI_Handleing.cpp">
@@ -44,5 +47,16 @@
     <ClInclude Include="ConfigWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LocSave">
+      <Filter>saveFiles</Filter>
+    </None>
+    <None Include="TypeSave">
+      <Filter>saveFiles</Filter>
+    </None>
+    <None Include="PartSave">
+      <Filter>saveFiles</Filter>
+    </None>
   </ItemGroup>
 </Project>

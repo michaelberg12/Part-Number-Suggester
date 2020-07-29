@@ -2,6 +2,7 @@
 #include <gtk/gtk.h>
 #include "UI_Handleing.h"
 #include "File_interfacer.h"
+#include "Part.h"
 
 #include <iostream>
 

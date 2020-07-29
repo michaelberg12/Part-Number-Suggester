@@ -55,7 +55,7 @@ void File_Interfacer::save_file_type(std::vector<std::string> file_type)
     this->_save("TypeSave", file_type);
 }
 
-std::vector<Part> File_Interfacer::_load_main()
+std::vector<Part> File_Interfacer::load_main()
 {
     std::vector<Part> return_value;
     std::vector<std::string> loaded_lines = this->_load("PartSave");
@@ -69,12 +69,12 @@ std::vector<Part> File_Interfacer::_load_main()
     return return_value;
 }
 
-std::vector<std::string> File_Interfacer::_load_file_loc()
+std::vector<std::string> File_Interfacer::load_file_loc()
 {
     return _load("LocSave");
 }
 
-std::vector<std::string> File_Interfacer::_load_file_type()
+std::vector<std::string> File_Interfacer::load_file_type()
 {
     return _load("TypeSave");
 }
