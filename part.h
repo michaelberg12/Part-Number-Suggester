@@ -24,6 +24,8 @@ public:
 	std::string rev();
 	std::string desc();
 
+	std::string save_string();
+
 	void part_list_append(GtkTreeStore* store, GtkTreeIter *iter);
 
 	GtkTreeRowReference* row_ref();

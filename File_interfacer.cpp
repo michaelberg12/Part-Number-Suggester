@@ -36,7 +36,39 @@ std::vector<WIN32_FIND_DATA> File_Interfacer::find_files(LPCWSTR file_location, 
     return std::vector<WIN32_FIND_DATA>();
 }
 
-void File_Interfacer::_save(std::wstring file_loc, std::vector<std::string> line_list)
+void File_Interfacer::save_main(std::vector<Part> part_list)
+{
+    std::vector<std::string> input;
+    for (auto part : part_list) {
+        input.push_back(part.);
+    }
+    this->_save();
+}
+
+void File_Interfacer::save_file_loc(std::vector<std::string> part_list)
+{
+}
+
+void File_Interfacer::save_file_type(std::vector<std::string> part_list)
+{
+}
+
+std::vector<Part> File_Interfacer::_load_main()
+{
+    return std::vector<Part>();
+}
+
+std::vector<std::string> File_Interfacer::_load_file_loc()
+{
+    return std::vector<std::string>();
+}
+
+std::vector<std::string> File_Interfacer::_load_file_type()
+{
+    return std::vector<std::string>();
+}
+
+void File_Interfacer::_save(std::string file_loc, std::vector<std::string> line_list)
 {
     std::ofstream save_file;
     save_file.open(file_loc, std::ios::trunc);
@@ -48,7 +80,7 @@ void File_Interfacer::_save(std::wstring file_loc, std::vector<std::string> line
     }
 }
 
-std::vector<std::string> File_Interfacer::_load(std::wstring file_loc)
+std::vector<std::string> File_Interfacer::_load(std::string file_loc)
 {
     std::vector<std::string> return_vector;
     std::ifstream saved_file;

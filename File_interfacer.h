@@ -24,7 +24,7 @@ public:
 	std::vector<std::string> _load_file_type();
 private:
 
-	void _save(std::wstring file_loc, std::vector<std::string> line_list);
-	std::vector<std::string> _load(std::wstring file_loc);
+	void _save(std::string file_loc, std::vector<std::string> line_list);
+	std::vector<std::string> _load(std::string file_loc);
 };
 

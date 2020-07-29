@@ -37,6 +37,11 @@ std::string Part::desc()
 	return _part_desc;
 }
 
+std::string Part::save_string()
+{
+	return (_part_name + " " + _part_id + " " + _part_rev + " " + _part_desc);
+}
+
 void Part::part_list_append(GtkTreeStore* store, GtkTreeIter *iter)
 {
 	gtk_tree_store_append(store, iter, NULL);
