@@ -49,5 +49,6 @@ private:
 	static void _add_clicked_path(GtkButton* button, gpointer user_data);
 	static void _remove_clicked(GtkButton* button, gpointer user_data);
 	static void _close_window(GtkButton* button, gpointer user_data);
+	static gboolean _delete_window(GtkWidget* widget, GdkEvent* event, gpointer data);
 };
 

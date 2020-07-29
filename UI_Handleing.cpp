@@ -36,10 +36,10 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 	_new_main_window();
 	_new_part_window();
 
-	
 	gtk_widget_show_all(_main_window);
 
 	gtk_main();
+
 }
 
 void UI_Handleing::_window_creation()

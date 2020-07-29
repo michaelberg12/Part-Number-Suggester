@@ -38,8 +38,9 @@ void ConfigWindow::_new_config_window(std::string name)
 	gtk_tree_selection_set_mode(_select, GTK_SELECTION_MULTIPLE);
 	g_signal_connect(G_OBJECT(_select), "changed", G_CALLBACK(_selection_changed_config), this);
 	gtk_container_add(GTK_CONTAINER(scrollable_list), config_list);
-
+	
 	g_signal_connect(_config_window, "destroy", G_CALLBACK(_close_window), _config_window);
+	g_signal_connect(_config_window, "delete-event", G_CALLBACK(_delete_window), _config_window);
 
 	GtkCellRenderer* rend_edit = gtk_cell_renderer_text_new();
 	g_object_set(rend_edit, "editable", TRUE, NULL);
@@ -161,3 +162,8 @@ void ConfigWindow::_close_window(GtkButton* button, gpointer user_data)
 }
 
 
+gboolean ConfigWindow::_delete_window(GtkWidget* widget, GdkEvent* event, gpointer data)
+{
+	gtk_widget_hide(widget);
+	return TRUE;
+}
