@@ -25,7 +25,7 @@ enum {
 class ConfigWindow
 {
 public:
-	ConfigWindow(std::string name);
+	ConfigWindow(bool file_location);
 	GtkWidget* window();
 private:
 
@@ -41,7 +41,7 @@ private:
 	GtkTreeSelection* _select;
 	GtkTreeViewColumn* _column;
 
-	void _new_config_window(std::string name);
+	void _new_config_window(bool file_location);
 
 	static void cell_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
 	static void _selection_changed_config(GtkTreeSelection* selection, gpointer data);

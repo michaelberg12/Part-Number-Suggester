@@ -2,10 +2,10 @@
 
 
 
-ConfigWindow::ConfigWindow(std::string name)
+ConfigWindow::ConfigWindow(bool file_location)
 {
 	_config_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	_new_config_window(name);
+	_new_config_window(file_location);
 }
 
 GtkWidget* ConfigWindow::window()
@@ -13,7 +13,7 @@ GtkWidget* ConfigWindow::window()
 	return _config_window;
 }
 
-void ConfigWindow::_new_config_window(std::string name)
+void ConfigWindow::_new_config_window(bool file_location)
 {
 	GtkWidget* main_window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(_config_window), main_window_box);
@@ -50,34 +50,28 @@ void ConfigWindow::_new_config_window(std::string name)
 	_column = gtk_tree_view_column_new_with_attributes("Name", rend_edit, "text", NAME_CON, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(config_list), _column);
 
-
-	//g_signal_connect(G_OBJECT(add_row), "clicked", G_CALLBACK(_add_clicked_path), this);
-	g_signal_connect(G_OBJECT(add_row), "clicked", G_CALLBACK(_add_clicked), this);
+	if (file_location) {
+		g_signal_connect(G_OBJECT(add_row), "clicked", G_CALLBACK(_add_clicked_path), this);
+	}
+	else {
+		g_signal_connect(G_OBJECT(add_row), "clicked", G_CALLBACK(_add_clicked), this);
+	}
 
 	_store = gtk_tree_store_new(N_COLUMNS_CON, G_TYPE_STRING);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(config_list), GTK_TREE_MODEL(_store));
 	g_object_unref(_store);
 
-	GtkTreeIter iter;
-
-	//============================= part number ui elements ===================================
-	for (int a1 = 0; a1 < 5; a1++) {
-		std::string part_number;
-		for (int a2 = 0; a2 < 20; a2++) {
-			part_number.append(std::to_string(rand() % 8 + 1));
-		}
-		part_number.insert(2, std::string(1, (char)(rand() % 26 + 65)));
-
-		gtk_tree_store_append(_store, &iter, NULL);
-		gtk_tree_store_set(_store, &iter, NAME, part_number.c_str(), -1);
-	}
-	//=========================================================================================
-
 	gtk_window_set_position(GTK_WINDOW(_config_window), GTK_WIN_POS_CENTER);
 	gtk_window_set_default_size(GTK_WINDOW(_config_window), 400, 200);
 	gtk_window_set_resizable(GTK_WINDOW(_config_window), FALSE);
-	gtk_window_set_title(GTK_WINDOW(_config_window), name.c_str());
+	if (file_location) {
+		gtk_window_set_title(GTK_WINDOW(_config_window), "File Locations");
+	}
+	else {
+		gtk_window_set_title(GTK_WINDOW(_config_window), "File Types");
+	}
+	
 }
 
 void ConfigWindow::cell_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)

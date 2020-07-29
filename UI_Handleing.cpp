@@ -24,8 +24,8 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 
 	File_Interfacer gen();
 
-	ConfigWindow _location_config("Folder Selection");
-	ConfigWindow _type_config("File Types");
+	ConfigWindow _location_config(true);
+	ConfigWindow _type_config(false);
 
 	_dir_config_window = _location_config.window();
 	_file_config_window = _type_config.window();
@@ -163,18 +163,26 @@ void UI_Handleing::_new_part_creation_menu(GtkWidget* vertical_box)
 
 void UI_Handleing::_new_main_menu(GtkWidget* list)
 {
-	GtkCellRenderer* rend_edit = gtk_cell_renderer_text_new();
-	g_object_set(rend_edit, "editable", TRUE, NULL);
-	GtkCellRenderer* rend_imm = gtk_cell_renderer_text_new();
-	g_object_set(rend_imm, "editable", FALSE, NULL);
+	GtkCellRenderer* rend__name = gtk_cell_renderer_text_new();
+	g_object_set(rend__name, "editable", TRUE, NULL);
+	GtkCellRenderer* rend_rev = gtk_cell_renderer_text_new();
+	g_object_set(rend_rev, "editable", TRUE, NULL);
+	GtkCellRenderer* rend_desc = gtk_cell_renderer_text_new();
+	g_object_set(rend_desc, "editable", TRUE, NULL);
+	GtkCellRenderer* rend_id = gtk_cell_renderer_text_new();
+	g_object_set(rend_id, "editable", FALSE, NULL);//not needed
 
-	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Name", rend_edit, "text", NAME, NULL);
+	g_signal_connect(G_OBJECT(rend__name), "edited", G_CALLBACK(cell_edited_callback), (gint*)NAME);
+	g_signal_connect(G_OBJECT(rend_rev), "edited", G_CALLBACK(cell_edited_callback), (gint*)REV);
+	g_signal_connect(G_OBJECT(rend_desc), "edited", G_CALLBACK(cell_edited_callback), (gint*)DESC);
+
+	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Name", rend__name, "text", NAME, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("ID", rend_imm, "text", ID, NULL);
+	column = gtk_tree_view_column_new_with_attributes("ID", rend_id, "text", ID, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("Revision", rend_edit, "text", REV, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Revision", rend_rev, "text", REV, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("Description", rend_edit, "text", DESC, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Description", rend_desc, "text", DESC, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
 	_store_parts = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
@@ -246,34 +254,12 @@ void UI_Handleing::_selection_changed_main(GtkTreeSelection* selection, gpointer
 		_selected_part_list.clear();
 		g_list_free_full(_list, (GDestroyNotify)gtk_tree_path_free);
 		_list = gtk_tree_selection_get_selected_rows(selection, NULL);
-		printf("Selected: %d Elements\n", g_list_length(_list));
 		for (GList* a1 = _list; a1 != NULL; a1 = a1->next)
 		{
 			GtkTreePath* indv_row = (GtkTreePath*)(a1->data);
 			gtk_tree_model_get_iter(GTK_TREE_MODEL(_store_parts), &iter, indv_row);
 			gchar* part_name, * part_id, * part_rev, * part_desc;
 			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
-			g_print("%s %s %s %s\n", part_name, part_id, part_rev, part_desc);
-			_selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, gtk_tree_row_reference_new(GTK_TREE_MODEL(_store_parts), indv_row)));
-		}
-	}
-}
-
-void UI_Handleing::_selection_changed_config(GtkTreeSelection* selection, gpointer data)
-{
-	if (!_selection_disable_flag) {
-		GtkTreeIter iter;
-		_selected_part_list.clear();
-		g_list_free_full(_list, (GDestroyNotify)gtk_tree_path_free);
-		_list = gtk_tree_selection_get_selected_rows(selection, NULL);
-		printf("Selected: %d Elements\n", g_list_length(_list));
-		for (GList* a1 = _list; a1 != NULL; a1 = a1->next)
-		{
-			GtkTreePath* indv_row = (GtkTreePath*)(a1->data);
-			gtk_tree_model_get_iter(GTK_TREE_MODEL(_store_parts), &iter, indv_row);
-			gchar* part_name, * part_id, * part_rev, * part_desc;
-			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
-			g_print("%s %s %s %s\n", part_name, part_id, part_rev, part_desc);
 			_selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, gtk_tree_row_reference_new(GTK_TREE_MODEL(_store_parts), indv_row)));
 		}
 	}
@@ -348,4 +334,12 @@ void UI_Handleing::_config_menu_loc(GtkMenuItem* menuitem, gpointer user_data)
 void UI_Handleing::_config_menu_type(GtkMenuItem* menuitem, gpointer user_data)
 {
 	gtk_widget_show_all(_file_config_window);
+}
+
+void UI_Handleing::cell_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)
+{
+	gint* column_id = (gint*)user_data;
+	GtkTreeIter iter_rawModel;
+	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(_store_parts), &iter_rawModel, path_string);
+	gtk_tree_store_set(_store_parts, &iter_rawModel, column_id, new_text, -1);
 }

@@ -55,6 +55,7 @@ private:
 	static void _delete_menu_item(GtkMenuItem* menuitem, gpointer user_data);
 	static void _config_menu_loc(GtkMenuItem* menuitem, gpointer user_data);
 	static void _config_menu_type(GtkMenuItem* menuitem, gpointer user_data);
+	static void cell_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
 
 	static void _new_part_window();
 };
