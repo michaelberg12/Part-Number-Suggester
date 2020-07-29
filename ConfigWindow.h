@@ -29,25 +29,25 @@ public:
 	GtkWidget* window();
 private:
 
-	HRESULT BasicFileOpen();
+	bool _selection_disable_flag;
 
-	static GList* _list;
+	std::vector<GtkTreeRowReference*> _row_refs;
 
-	static GtkTreeStore* _store;
-	static GtkTreeStore* _store_types;
+	GtkWidget* _config_window;
+	GtkWidget* config_list;
 
-	static bool _selection_disable_flag;
-	static GtkTreeSelection* _select;
+	GList* _list;
+	GtkTreeStore* _store;
+	GtkTreeSelection* _select;
+	GtkTreeViewColumn* _column;
 
-	static GtkWidget* _config_window;
-	static GtkWidget* config_list;
-
-	void _new_config_window();
+	void _new_config_window(std::string name);
 
 	static void cell_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
 	static void _selection_changed_config(GtkTreeSelection* selection, gpointer data);
 	static void _add_clicked(GtkButton* button, gpointer user_data);
 	static void _add_clicked_path(GtkButton* button, gpointer user_data);
 	static void _remove_clicked(GtkButton* button, gpointer user_data);
+	static void _close_window(GtkButton* button, gpointer user_data);
 };
 

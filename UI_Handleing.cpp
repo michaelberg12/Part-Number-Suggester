@@ -2,7 +2,8 @@
 
 GtkWidget* UI_Handleing::_part_window;
 GtkWidget* UI_Handleing::_main_window;
-GtkWidget* UI_Handleing::_config_window;
+GtkWidget* UI_Handleing::_file_config_window;
+GtkWidget* UI_Handleing::_dir_config_window;
 
 GtkWidget* UI_Handleing::_part_name_input;
 GtkWidget* UI_Handleing::_part_desc_input;
@@ -22,7 +23,12 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 	gtk_init(&argc, &argv);
 
 	File_Interfacer gen();
-	ConfigWindow location_config("name");
+
+	ConfigWindow _location_config("Folder Selection");
+	ConfigWindow _type_config("File Types");
+
+	_dir_config_window = _location_config.window();
+	_file_config_window = _type_config.window();
 
 	srand(time(0));
 
@@ -31,7 +37,7 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 	_new_part_window();
 
 	
-	gtk_widget_show_all(location_config.window());
+	gtk_widget_show_all(_main_window);
 
 	gtk_main();
 }
@@ -336,8 +342,10 @@ void UI_Handleing::_delete_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 
 void UI_Handleing::_config_menu_loc(GtkMenuItem* menuitem, gpointer user_data)
 {
+	gtk_widget_show_all(_dir_config_window);
 }
 
 void UI_Handleing::_config_menu_type(GtkMenuItem* menuitem, gpointer user_data)
 {
+	gtk_widget_show_all(_file_config_window);
 }

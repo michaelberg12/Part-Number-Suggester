@@ -18,6 +18,7 @@ class UI_Handleing
 public:
 	UI_Handleing(int argc, char* argv[]);
 private:
+
 	static GList* _list;
 
 	static GtkTreeStore* _store_parts;
@@ -29,7 +30,8 @@ private:
 
 	static GtkWidget* _part_window;
 	static GtkWidget* _main_window;
-	static GtkWidget* _config_window;
+	static GtkWidget* _file_config_window;
+	static GtkWidget* _dir_config_window;
 
 	//remove these as soon as possible
 	//use the buffer to remove them
