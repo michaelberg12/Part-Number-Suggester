@@ -35,3 +35,29 @@ std::vector<WIN32_FIND_DATA> File_Interfacer::find_files(LPCWSTR file_location, 
     }
     return std::vector<WIN32_FIND_DATA>();
 }
+
+void File_Interfacer::_save(std::string file_loc, std::vector<std::string> line_list)
+{
+    std::ofstream save_file;
+    save_file.open(file_loc, std::ios::trunc);
+    if (save_file.is_open()) {
+        for (auto line : line_list) {
+            save_file << line << std::endl;
+        }
+        save_file.close();
+    }
+}
+
+std::vector<std::string> File_Interfacer::_load(std::string file_loc)
+{
+    std::vector<std::string> return_vector;
+    std::ifstream saved_file;
+    saved_file.open(file_loc);
+    if (saved_file.is_open()) {
+        std::string buffer;
+        while (std::getline(saved_file, buffer)) {
+            return_vector.push_back(buffer);
+        }
+    }
+    return return_vector;
+}
