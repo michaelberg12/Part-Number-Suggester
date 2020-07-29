@@ -29,6 +29,7 @@ public:
 	GtkWidget* window();
 private:
 
+	bool _file_location;
 	bool _selection_disable_flag;
 
 	std::vector<GtkTreeRowReference*> _row_refs;
@@ -41,7 +42,7 @@ private:
 	GtkTreeSelection* _select;
 	GtkTreeViewColumn* _column;
 
-	void _new_config_window(bool file_location);
+	void _new_config_window();
 
 	static void cell_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
 	static void _selection_changed_config(GtkTreeSelection* selection, gpointer data);
@@ -49,6 +50,8 @@ private:
 	static void _add_clicked_path(GtkButton* button, gpointer user_data);
 	static void _remove_clicked(GtkButton* button, gpointer user_data);
 	static void _close_window(GtkButton* button, gpointer user_data);
+	static void _update_save(GtkTreeModel* tree_model, GtkTreePath* path, GtkTreeIter* iter, gpointer user_data);
 	static gboolean _delete_window(GtkWidget* widget, GdkEvent* event, gpointer data);
+	static gboolean _to_string_vector(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer data);
 };
 

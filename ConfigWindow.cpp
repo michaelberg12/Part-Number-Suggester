@@ -4,8 +4,9 @@
 
 ConfigWindow::ConfigWindow(bool file_location)
 {
+	_file_location = file_location;
 	_config_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	_new_config_window(file_location);
+	_new_config_window();
 }
 
 GtkWidget* ConfigWindow::window()
@@ -13,7 +14,7 @@ GtkWidget* ConfigWindow::window()
 	return _config_window;
 }
 
-void ConfigWindow::_new_config_window(bool file_location)
+void ConfigWindow::_new_config_window()
 {
 	GtkWidget* main_window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(_config_window), main_window_box);
@@ -50,7 +51,7 @@ void ConfigWindow::_new_config_window(bool file_location)
 	_column = gtk_tree_view_column_new_with_attributes("Name", rend_edit, "text", NAME_CON, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(config_list), _column);
 
-	if (file_location) {
+	if (_file_location) {
 		g_signal_connect(G_OBJECT(add_row), "clicked", G_CALLBACK(_add_clicked_path), this);
 	}
 	else {
@@ -59,13 +60,29 @@ void ConfigWindow::_new_config_window(bool file_location)
 
 	_store = gtk_tree_store_new(N_COLUMNS_CON, G_TYPE_STRING);
 
+	File_Interfacer file;
+	std::vector<std::string> buffer;
+	if (_file_location) {
+		buffer = file.load_file_loc();
+	}
+	else {
+		buffer = file.load_file_type();
+	}
+	for (auto line : buffer) {
+		GtkTreeIter iter;
+		gtk_tree_store_append(_store, &iter, NULL);
+		gtk_tree_store_set(_store, &iter, NAME_CON, line.c_str(), -1);
+	}
+
 	gtk_tree_view_set_model(GTK_TREE_VIEW(config_list), GTK_TREE_MODEL(_store));
 	g_object_unref(_store);
+
+	g_signal_connect(G_OBJECT(GTK_TREE_MODEL(_store)), "row-changed", G_CALLBACK(_update_save), this);
 
 	gtk_window_set_position(GTK_WINDOW(_config_window), GTK_WIN_POS_CENTER);
 	gtk_window_set_default_size(GTK_WINDOW(_config_window), 400, 200);
 	gtk_window_set_resizable(GTK_WINDOW(_config_window), FALSE);
-	if (file_location) {
+	if (_file_location) {
 		gtk_window_set_title(GTK_WINDOW(_config_window), "File Locations");
 	}
 	else {
@@ -155,9 +172,35 @@ void ConfigWindow::_close_window(GtkButton* button, gpointer user_data)
 	gtk_widget_hide(config_window);
 }
 
+void ConfigWindow::_update_save(GtkTreeModel* tree_model, GtkTreePath* path, GtkTreeIter* iter, gpointer user_data)
+{
+	File_Interfacer file;
+	ConfigWindow* class_ref = (ConfigWindow*)user_data;
+	std::vector<std::string> buffer;
+	gtk_tree_model_foreach(GTK_TREE_MODEL(class_ref->_store), _to_string_vector, &buffer);
+	if (class_ref->_file_location) {
+		file.save_file_loc(buffer);
+	}
+	else {
+		file.save_file_type(buffer);
+	}
+}
+
 
 gboolean ConfigWindow::_delete_window(GtkWidget* widget, GdkEvent* event, gpointer data)
 {
 	gtk_widget_hide(widget);
 	return TRUE;
+}
+
+gboolean ConfigWindow::_to_string_vector(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer data)
+{
+	gchar* line;
+	std::vector<std::string>* buffer = (std::vector<std::string>*)data;
+
+	gtk_tree_model_get(model, iter,0 , &line, -1);
+	buffer->push_back(line);
+	g_free(line); 
+
+	return FALSE; 
 }

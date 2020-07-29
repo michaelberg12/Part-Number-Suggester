@@ -36,6 +36,49 @@ std::vector<WIN32_FIND_DATA> File_Interfacer::find_files(LPCWSTR file_location, 
     return std::vector<WIN32_FIND_DATA>();
 }
 
+void File_Interfacer::save_main(std::vector<Part> part_list)
+{
+    std::vector<std::string> input;
+    for (auto part : part_list) {
+        input.push_back(part.save_string());
+    }
+    this->_save("PartSave", input);
+}
+
+void File_Interfacer::save_file_loc(std::vector<std::string> file_loc)
+{
+    this->_save("LocSave", file_loc);
+}
+
+void File_Interfacer::save_file_type(std::vector<std::string> file_type)
+{
+    this->_save("TypeSave", file_type);
+}
+
+std::vector<Part> File_Interfacer::load_main()
+{
+    std::vector<Part> return_value;
+    std::vector<std::string> loaded_lines = this->_load("PartSave");
+    for (auto line : loaded_lines) {
+        std::vector<std::string> buffer;
+        boost::split(buffer, line, boost::is_any_of(" "));
+        if (buffer.size() >= 4){
+            return_value.push_back(Part(buffer[0], buffer[1], buffer[2], buffer[3]));
+        }
+    }
+    return return_value;
+}
+
+std::vector<std::string> File_Interfacer::load_file_loc()
+{
+    return _load("LocSave");
+}
+
+std::vector<std::string> File_Interfacer::load_file_type()
+{
+    return _load("TypeSave");
+}
+
 void File_Interfacer::_save(std::string file_loc, std::vector<std::string> line_list)
 {
     std::ofstream save_file;
