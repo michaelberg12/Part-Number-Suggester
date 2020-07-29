@@ -6,6 +6,10 @@
 #include <Windows.h>
 #include <vector>
 
+//because i am lazy
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string.hpp>
+
 #include "Part.h"
 
 class File_Interfacer
