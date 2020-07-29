@@ -2,6 +2,7 @@
 
 GtkWidget* UI_Handleing::_part_window;
 GtkWidget* UI_Handleing::_main_window;
+GtkWidget* UI_Handleing::_config_window;
 
 GtkWidget* UI_Handleing::_part_name_input;
 GtkWidget* UI_Handleing::_part_desc_input;
@@ -21,6 +22,7 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 	gtk_init(&argc, &argv);
 
 	File_Interfacer gen();
+	ConfigWindow location_config("name");
 
 	srand(time(0));
 
@@ -28,7 +30,8 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 	_new_main_window();
 	_new_part_window();
 
-	gtk_widget_show_all(_main_window);
+	
+	gtk_widget_show_all(location_config.window());
 
 	gtk_main();
 }
@@ -51,19 +54,28 @@ void UI_Handleing::_new_main_window()
 
 	GtkWidget* new_part = gtk_menu_item_new_with_label("New");
 	GtkWidget* delete_part = gtk_menu_item_new_with_label("Delete");
-	GtkWidget* configure_files = gtk_menu_item_new_with_label("Config");
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), new_part);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), delete_part);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), configure_files);
+
+	GtkWidget* configure_menu = gtk_menu_new();
+	GtkWidget* configure_menu_label = gtk_menu_item_new_with_label("Config");
+	GtkWidget* config_loc = gtk_menu_item_new_with_label("File Locations");
+	GtkWidget* config_types = gtk_menu_item_new_with_label("File Types");
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(configure_menu_label), configure_menu);
+	gtk_menu_shell_append(GTK_MENU_SHELL(configure_menu), config_types);
+	gtk_menu_shell_append(GTK_MENU_SHELL(configure_menu), config_loc);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), configure_menu_label);
+
 	g_signal_connect(G_OBJECT(new_part), "activate", G_CALLBACK(_new_menu_item), NULL);
 	g_signal_connect(G_OBJECT(delete_part), "activate", G_CALLBACK(_delete_menu_item), NULL);
-	g_signal_connect(G_OBJECT(configure_files), "activate", G_CALLBACK(_config_menu_item), NULL);
+	g_signal_connect(G_OBJECT(config_loc), "activate", G_CALLBACK(_config_menu_loc), NULL);
+	g_signal_connect(G_OBJECT(config_types), "activate", G_CALLBACK(_config_menu_type), NULL);
 
 	GtkWidget* part_list = gtk_tree_view_new();
 	gtk_tree_view_set_grid_lines(GTK_TREE_VIEW(part_list), GTK_TREE_VIEW_GRID_LINES_BOTH);
 	_select = gtk_tree_view_get_selection(GTK_TREE_VIEW(part_list));
 	gtk_tree_selection_set_mode(_select, GTK_SELECTION_MULTIPLE);
-	g_signal_connect(G_OBJECT(_select), "changed", G_CALLBACK(_selection_changed),NULL);
+	g_signal_connect(G_OBJECT(_select), "changed", G_CALLBACK(_selection_changed_main),NULL);
 	gtk_container_add(GTK_CONTAINER(scrollable_list), part_list);
 
 	g_signal_connect(_main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
@@ -145,14 +157,18 @@ void UI_Handleing::_new_part_creation_menu(GtkWidget* vertical_box)
 
 void UI_Handleing::_new_main_menu(GtkWidget* list)
 {
-	GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
-	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Name", renderer, "text", NAME, NULL);
+	GtkCellRenderer* rend_edit = gtk_cell_renderer_text_new();
+	g_object_set(rend_edit, "editable", TRUE, NULL);
+	GtkCellRenderer* rend_imm = gtk_cell_renderer_text_new();
+	g_object_set(rend_imm, "editable", FALSE, NULL);
+
+	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Name", rend_edit, "text", NAME, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("ID", renderer, "text", ID, NULL);
+	column = gtk_tree_view_column_new_with_attributes("ID", rend_imm, "text", ID, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("Revision", renderer, "text", REV, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Revision", rend_edit, "text", REV, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("Description", renderer, "text", DESC, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Description", rend_edit, "text", DESC, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
 	_store_parts = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
@@ -217,7 +233,27 @@ void UI_Handleing::_part_number_confirm(GtkButton* button, gpointer user_data)
 	gtk_label_set_markup(GTK_LABEL(part_number_label), part_number.c_str());
 }
 
-void UI_Handleing::_selection_changed(GtkTreeSelection* selection, gpointer data)
+void UI_Handleing::_selection_changed_main(GtkTreeSelection* selection, gpointer data)
+{
+	if (!_selection_disable_flag) {
+		GtkTreeIter iter;
+		_selected_part_list.clear();
+		g_list_free_full(_list, (GDestroyNotify)gtk_tree_path_free);
+		_list = gtk_tree_selection_get_selected_rows(selection, NULL);
+		printf("Selected: %d Elements\n", g_list_length(_list));
+		for (GList* a1 = _list; a1 != NULL; a1 = a1->next)
+		{
+			GtkTreePath* indv_row = (GtkTreePath*)(a1->data);
+			gtk_tree_model_get_iter(GTK_TREE_MODEL(_store_parts), &iter, indv_row);
+			gchar* part_name, * part_id, * part_rev, * part_desc;
+			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
+			g_print("%s %s %s %s\n", part_name, part_id, part_rev, part_desc);
+			_selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, gtk_tree_row_reference_new(GTK_TREE_MODEL(_store_parts), indv_row)));
+		}
+	}
+}
+
+void UI_Handleing::_selection_changed_config(GtkTreeSelection* selection, gpointer data)
 {
 	if (!_selection_disable_flag) {
 		GtkTreeIter iter;
@@ -294,10 +330,14 @@ void UI_Handleing::_delete_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 		gtk_tree_store_remove(_store_parts, &iter);
 	}
 	_selection_disable_flag = false;
-
+	gtk_tree_selection_set_mode(_select, GTK_SELECTION_NONE);
+	gtk_tree_selection_set_mode(_select, GTK_SELECTION_MULTIPLE);
 }
 
-void UI_Handleing::_config_menu_item(GtkMenuItem* menuitem, gpointer user_data)
+void UI_Handleing::_config_menu_loc(GtkMenuItem* menuitem, gpointer user_data)
 {
-	g_print("Config signal triggered\n");
+}
+
+void UI_Handleing::_config_menu_type(GtkMenuItem* menuitem, gpointer user_data)
+{
 }

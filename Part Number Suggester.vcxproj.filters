@@ -27,6 +27,9 @@
     <ClCompile Include="Part.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ConfigWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UI_Handleing.h">
@@ -36,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Part.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
