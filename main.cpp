@@ -13,6 +13,5 @@
 int main(int argc, char* argv[])
 {
     UI_Handleing main_sim(argc, argv);
-
     return 0;
 }

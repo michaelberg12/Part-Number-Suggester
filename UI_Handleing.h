@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <time.h> 
+#include <algorithm>
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -48,14 +49,16 @@ private:
 
 	static void _part_number_confirm(GtkButton* button, gpointer user_data);
 	static void _selection_changed_main(GtkTreeSelection* selection, gpointer data);
-	static void _selection_changed_config(GtkTreeSelection* selection, gpointer data);
 	static void _generate_new_part_number(GtkButton* button, gpointer user_data);
 
+	static std::vector<Part> _parse_files(std::vector<WIN32_FIND_DATA> files_data);
 	static void _new_menu_item(GtkMenuItem* menuitem, gpointer user_data);
 	static void _delete_menu_item(GtkMenuItem* menuitem, gpointer user_data);
 	static void _config_menu_loc(GtkMenuItem* menuitem, gpointer user_data);
 	static void _config_menu_type(GtkMenuItem* menuitem, gpointer user_data);
 	static void cell_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
+	static bool _verify_file_name(std::string file_name);
+	static void _add_files(std::vector<Part> part_list);
 
 	static void _new_part_window();
 };

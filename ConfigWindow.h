@@ -7,9 +7,6 @@
 #include <vector>
 #include <time.h> 
 #include <windows.h>      // For common windows data types and function headers
-#define STRICT_TYPED_ITEMIDS
-#include <objbase.h>      // For COM headers
-#include <shobjidl.h>     // for IFileDialogEvents and IFileDialogControlEvents
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -50,6 +47,7 @@ private:
 	static void _add_clicked_path(GtkButton* button, gpointer user_data);
 	static void _remove_clicked(GtkButton* button, gpointer user_data);
 	static void _close_window(GtkButton* button, gpointer user_data);
+	static void _update_save_del(GtkTreeModel* tree_model, GtkTreePath* path, gpointer user_data);
 	static void _update_save(GtkTreeModel* tree_model, GtkTreePath* path, GtkTreeIter* iter, gpointer user_data);
 	static gboolean _delete_window(GtkWidget* widget, GdkEvent* event, gpointer data);
 	static gboolean _to_string_vector(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer data);

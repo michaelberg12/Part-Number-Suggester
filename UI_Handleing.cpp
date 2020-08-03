@@ -190,21 +190,16 @@ void UI_Handleing::_new_main_menu(GtkWidget* list)
 	gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(_store_parts));
 	g_object_unref(_store_parts);
 
-	GtkTreeIter iter;
-
-	//============================= part number ui elements ===================================
-	for (int a1 = 0; a1 < 10; a1++) {
-		std::string part_number;
-		for (int a2 = 0; a2 < 5; a2++) {
-			part_number.append(std::to_string(rand() % 8 + 1));
-		}
-		part_number.insert(2, std::string(1, (char)(rand() % 26 + 65)));
-
-		Part default_part("Builder", part_number,  std::string(1, (char)(rand() % 26 + 65)), "Sample Text");
-
-		default_part.part_list_append(_store_parts, &iter);
+	
+	File_Interfacer file;
+	for (auto location : file.load_file_loc()) {
+		std::vector<WIN32_FIND_DATA> files_data;
+		location.append("\\*");
+		//g_print("%s\n", (LPCWSTR)location.c_str());
+		std::wstring wide_s = std::wstring(location.begin(), location.end());
+		files_data = file.find_files(wide_s.c_str(), 0);
+		_add_files(_parse_files(files_data));
 	}
-	//=========================================================================================
 
 }
 
@@ -299,6 +294,60 @@ void UI_Handleing::_generate_new_part_number(GtkButton* button, gpointer user_da
 	gtk_label_set_markup(GTK_LABEL(part_number_label), part_number.c_str());
 }
 
+std::vector<Part> UI_Handleing::_parse_files(std::vector<WIN32_FIND_DATA> files_data)
+{
+	File_Interfacer file;
+	std::vector<Part> return_value;
+	for (auto file_data : files_data) {
+		std::wstring file_name = std::wstring(file_data.cFileName);
+		for (auto a1 = file_name.crbegin(); a1 != file_name.crend(); a1++) {
+			std::wstring file_name_modified;
+			if (*a1 == L'.') {
+				file_name_modified.assign(file_name.crbegin(), a1);
+				std::reverse(file_name_modified.begin(), file_name_modified.end());
+				std::wcout << file_name_modified << L" ";
+
+				std::vector<std::string> types = file.load_file_type();
+				for (auto type : types) {
+					std::wstring type_conv = std::wstring(type.begin(), type.end());
+					if (type_conv == file_name_modified) {
+						file_name_modified.assign(a1 + 1, file_name.crend());
+						std::reverse(file_name_modified.begin(), file_name_modified.end());
+						std::wcout << file_name_modified << L" ";
+						std::string file_id = std::string(file_name_modified.begin(), file_name_modified.end());
+
+						if (_verify_file_name(file_id)) {
+							//file conforms to standards
+							if (file_id.size() == 7) {
+								//contains revision
+								std::string rev = std::string(1, file_id.back());
+								file_id.pop_back();
+								return_value.push_back(Part(file_id, file_id, rev, ""));
+							}
+							else if (file_id.size() == 6) {
+								//conforms
+								return_value.push_back(Part(file_id, file_id, "MC", ""));
+							}
+						}
+						else {
+							return_value.push_back(Part(file_id, "N/A", "", ""));
+							//non conforming files
+						}
+						std::wcout << type_conv << L"==" << file_name_modified << L" ";
+					}
+					else {
+						std::wcout << type_conv << L"!=" << file_name_modified << L" ";
+					}
+				}
+				std::wcout << std::endl;
+				break;
+			}
+		}
+	}
+
+	return return_value;
+}
+
 void UI_Handleing::_new_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 {
 	g_print("New signal triggered\n");
@@ -342,4 +391,51 @@ void UI_Handleing::cell_edited_callback(GtkCellRendererText* cell, gchar* path_s
 	GtkTreeIter iter_rawModel;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(_store_parts), &iter_rawModel, path_string);
 	gtk_tree_store_set(_store_parts, &iter_rawModel, column_id, new_text, -1);
+}
+
+bool UI_Handleing::_verify_file_name(std::string file_name)
+{
+	//id format must be 
+	//11A111
+	printf("%s : %d ", file_name.c_str(), file_name.size());
+	if (file_name.size() != 6 && file_name.size() != 7) { return false; }
+	for (int a1 = 0; a1 < file_name.size(); a1++) {
+		int code = (int)file_name[a1];
+		printf("%d %d ", a1, code);
+		if (a1 == 2) {
+			//must be A->Z
+			if (65 < code && code > 90) { return false; }
+		}
+		else if (a1 == 6) {
+			//must be A->Z
+			if (65 < code && code > 90) { return false; }
+		}
+		else {
+			//must be 0->9
+			if (48 < code && code > 57) { return false; }
+		}
+
+	}
+	return true;
+}
+
+void UI_Handleing::_add_files(std::vector<Part> part_list)
+{
+	std::vector<Part> master_list;
+	for (int a1 = 0; a1 < part_list.size(); a1++) {
+		if (part_list[a1].rev() == "MC") {
+			master_list.push_back(part_list[a1]);
+		}
+	}
+	GtkTreeIter iter, child;
+
+	for (auto file_add : part_list) {
+		if (false) {
+			file_add.part_list_append(_store_parts, &iter, &child);
+		}
+		else {
+			file_add.part_list_append(_store_parts, &iter);
+		}
+		
+	}
 }

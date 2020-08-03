@@ -16,6 +16,7 @@ GtkWidget* ConfigWindow::window()
 
 void ConfigWindow::_new_config_window()
 {
+
 	GtkWidget* main_window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(_config_window), main_window_box);
 
@@ -78,6 +79,7 @@ void ConfigWindow::_new_config_window()
 	g_object_unref(_store);
 
 	g_signal_connect(G_OBJECT(GTK_TREE_MODEL(_store)), "row-changed", G_CALLBACK(_update_save), this);
+	g_signal_connect(G_OBJECT(GTK_TREE_MODEL(_store)), "row-deleted", G_CALLBACK(_update_save_del), this);
 
 	gtk_window_set_position(GTK_WINDOW(_config_window), GTK_WIN_POS_CENTER);
 	gtk_window_set_default_size(GTK_WINDOW(_config_window), 400, 200);
@@ -170,6 +172,11 @@ void ConfigWindow::_close_window(GtkButton* button, gpointer user_data)
 {
 	GtkWidget* config_window = (GtkWidget*)user_data;
 	gtk_widget_hide(config_window);
+}
+
+void ConfigWindow::_update_save_del(GtkTreeModel* tree_model, GtkTreePath* path, gpointer user_data)
+{
+	_update_save(tree_model, path, NULL, user_data);
 }
 
 void ConfigWindow::_update_save(GtkTreeModel* tree_model, GtkTreePath* path, GtkTreeIter* iter, gpointer user_data)
