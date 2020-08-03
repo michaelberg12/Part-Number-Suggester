@@ -27,14 +27,14 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 	ConfigWindow _location_config(true);
 	ConfigWindow _type_config(false);
 
+	
 	_dir_config_window = _location_config.window();
 	_file_config_window = _type_config.window();
 
-	srand(time(0));
+	MainWindow _file_list(_dir_config_window, _file_config_window);
+	_main_window = _file_list.window();
 
-	_window_creation();
-	_new_main_window();
-	_new_part_window();
+	srand(time(0));
 
 	gtk_widget_show_all(_main_window);
 
@@ -44,7 +44,6 @@ UI_Handleing::UI_Handleing(int argc, char* argv[])
 
 void UI_Handleing::_window_creation()
 {
-	_main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	_part_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 }
 
