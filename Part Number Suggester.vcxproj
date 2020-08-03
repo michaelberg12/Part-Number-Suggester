@@ -143,12 +143,14 @@
     <ClCompile Include="ConfigWindow.cpp" />
     <ClCompile Include="file_interfacer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="Part.cpp" />
     <ClCompile Include="UI_Handleing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConfigWindow.h" />
     <ClInclude Include="file_interfacer.h" />
+    <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Part.h" />
     <ClInclude Include="UI_Handleing.h" />
   </ItemGroup>

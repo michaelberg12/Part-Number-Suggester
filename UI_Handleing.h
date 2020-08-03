@@ -13,6 +13,7 @@
 #include "Part.h"
 #include "File_interfacer.h"
 #include "ConfigWindow.h"
+#include "MainWindow.h"
 
 class UI_Handleing
 {
