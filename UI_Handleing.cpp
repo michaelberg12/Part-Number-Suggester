@@ -301,16 +301,16 @@ std::vector<Part> UI_Handleing::_parse_files(std::vector<WIN32_FIND_DATA> files_
 	for (auto file_data : files_data) {
 		std::wstring file_name = std::wstring(file_data.cFileName);
 		for (auto a1 = file_name.crbegin(); a1 != file_name.crend(); a1++) {
-			std::wstring file_name_modified;
+			std::wstring file_name_modified, file_exstention;
 			if (*a1 == L'.') {
-				file_name_modified.assign(file_name.crbegin(), a1);
-				std::reverse(file_name_modified.begin(), file_name_modified.end());
-				std::wcout << file_name_modified << L" ";
+				file_exstention.assign(file_name.crbegin(), a1);
+				std::reverse(file_exstention.begin(), file_exstention.end());
+				std::wcout << file_exstention << L" ";
 
 				std::vector<std::string> types = file.load_file_type();
 				for (auto type : types) {
 					std::wstring type_conv = std::wstring(type.begin(), type.end());
-					if (type_conv == file_name_modified) {
+					if (type_conv == file_exstention) {
 						file_name_modified.assign(a1 + 1, file_name.crend());
 						std::reverse(file_name_modified.begin(), file_name_modified.end());
 						std::wcout << file_name_modified << L" ";
@@ -326,7 +326,12 @@ std::vector<Part> UI_Handleing::_parse_files(std::vector<WIN32_FIND_DATA> files_
 							}
 							else if (file_id.size() == 6) {
 								//conforms
-								return_value.push_back(Part(file_id, file_id, "MC", ""));
+								if (file_exstention == L"SLDDRW") {
+									return_value.push_back(Part(file_id, file_id, "DWG", ""));
+								}
+								else {
+									return_value.push_back(Part(file_id, file_id, "MC", ""));
+								}
 							}
 						}
 						else {
@@ -430,12 +435,13 @@ void UI_Handleing::_add_files(std::vector<Part> part_list)
 	GtkTreeIter iter, child;
 
 	for (auto file_add : part_list) {
-		if (false) {
-			file_add.part_list_append(_store_parts, &iter, &child);
-		}
-		else {
+		if (file_add.rev() == "MC") {
 			file_add.part_list_append(_store_parts, &iter);
+			for (auto file_child_add : part_list) {
+				if (file_child_add.rev() != "MC" && file_child_add.id() == file_add.id()) {
+					file_child_add.part_list_append(_store_parts, &iter, &child);
+				}
+			}
 		}
-		
 	}
 }
