@@ -11,7 +11,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-#include "Part.h"
+#include "FileData.h"
 #include "File_interfacer.h"
 #include "ConfigWindow.h"
 
