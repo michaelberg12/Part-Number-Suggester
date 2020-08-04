@@ -10,7 +10,6 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-
 #include "FileData.h"
 #include "File_interfacer.h"
 #include "ConfigWindow.h"
