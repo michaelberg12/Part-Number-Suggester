@@ -3,14 +3,6 @@
 #include <cairo.h>
 #include <gtk/gtk.h>
 
-enum {
-	NAME,
-	ID,
-	REV,
-	DESC,
-	N_COLUMNS
-};
-
 class Part
 {
 public:

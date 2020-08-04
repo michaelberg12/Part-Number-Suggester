@@ -13,11 +13,6 @@
 #include "FileData.h"
 #include "File_interfacer.h"
 
-enum {
-	NAME_CON,
-	N_COLUMNS_CON
-};
-
 class ConfigWindow
 {
 public:

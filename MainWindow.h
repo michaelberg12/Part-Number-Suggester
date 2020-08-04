@@ -13,6 +13,7 @@
 #include "FileData.h"
 #include "File_interfacer.h"
 #include "ConfigWindow.h"
+#include "Enums.h"
 
 class MainWindow
 {
@@ -50,6 +51,8 @@ private:
 	static void _delete_menu_item(GtkMenuItem* menuitem, gpointer user_data);
 	static void _config_menu_loc(GtkMenuItem* menuitem, gpointer user_data);
 	static void _config_menu_type(GtkMenuItem* menuitem, gpointer user_data);
-	static void cell_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
+	static void name_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
+	static void rev_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
+	static void desc_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
 };
 

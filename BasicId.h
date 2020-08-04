@@ -1,9 +1,14 @@
 #pragma once
+
 #include <string>
 
-__interface ID
+#include "ID.h"
+
+class BasicId : public ID
 {
 public:
+	BasicId(std::wstring file_name);
+
 	//to display (parsed)
 	std::string to_str();
 	std::wstring to_wstr();
@@ -22,5 +27,7 @@ public:
 
 	//the size of the id structure
 	int size();
+private:
+
 };
 
