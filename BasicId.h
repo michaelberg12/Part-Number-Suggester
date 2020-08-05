@@ -53,6 +53,7 @@ public:
 
 	void operator=(const BasicId& b_id);
 	bool operator==(const BasicId& b_id);
+	bool operator!=(const BasicId& b_id);
 private:
 	std::string _wstr_to_str(std::wstring w_string);
 	std::wstring _str_to_wstr(std::string n_string);

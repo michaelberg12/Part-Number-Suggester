@@ -108,6 +108,11 @@ bool BasicId::operator==(const BasicId& b_id)
 	return (this->_id == b_id._id && this->_rev == b_id._rev);
 }
 
+bool BasicId::operator!=(const BasicId& b_id)
+{
+	return !(*this == b_id);
+}
+
 std::string BasicId::_wstr_to_str(std::wstring w_string)
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -137,7 +142,7 @@ void BasicId::_parse()
 
 			//check to see if this is a basic ID
 			if (this->valid(file_id)) {
-				this->_id = file_id;
+				this->_id.assign(_file_name.begin(), _file_name.begin() + 6);
 				//file conforms to standards
 				if (file_id.size() <= 7) {
 					//conforms and contains revision
@@ -157,9 +162,17 @@ void BasicId::_parse()
 		}
 	}
 	if (!exstension_flag && this->valid(this->_file_name)) {
-		//no file exstension
-		this->_rev = "";
-		this->_id = this->_file_name;
+		//id conforms to standards with no file exstension
+		this->_id.assign(_file_name.begin(), _file_name.begin() + 6);
+		if (_file_name.size() <= 8) {
+			//conforms and contains revision
+			this->_rev.assign(_file_name.begin() + 6, _file_name.end());
+			
+		}
+		else if (_file_name.size() == 6) {
+			//conforms
+			this->_rev = "";
+		}
 	}
 	else if (!exstension_flag) {
 		this->_rev = "";
