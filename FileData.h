@@ -3,6 +3,8 @@
 #include <cairo.h>
 #include <gtk/gtk.h>
 
+#include "Enums.h"
+
 class Part
 {
 public:

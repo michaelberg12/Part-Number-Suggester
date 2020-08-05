@@ -45,13 +45,13 @@ std::string Part::save_string()
 void Part::part_list_append(GtkTreeStore* store, GtkTreeIter *iter)
 {
 	gtk_tree_store_append(store, iter, NULL);
-	gtk_tree_store_set(store, iter, NAME, this->_part_name.c_str(), ID, this->_part_id.c_str(), REV, this->_part_rev.c_str(), DESC, this->_part_desc.c_str(), -1);
+	gtk_tree_store_set(store, iter, Main::NAME, this->_part_name.c_str(), Main::ID, this->_part_id.c_str(), Main::REV, this->_part_rev.c_str(), Main::DESC, this->_part_desc.c_str(), -1);
 }
 
 void Part::part_list_append(GtkTreeStore* store, GtkTreeIter* iter, GtkTreeIter* child_iter)
 {
 	gtk_tree_store_append(store, child_iter, iter);
-	gtk_tree_store_set(store, child_iter, NAME, this->_part_name.c_str(), ID, this->_part_id.c_str(), REV, this->_part_rev.c_str(), DESC, this->_part_desc.c_str(), -1);
+	gtk_tree_store_set(store, child_iter, Main::NAME, this->_part_name.c_str(), Main::ID, this->_part_id.c_str(), Main::REV, this->_part_rev.c_str(), Main::DESC, this->_part_desc.c_str(), -1);
 }
 
 GtkTreeRowReference* Part::row_ref()

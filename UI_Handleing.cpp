@@ -171,20 +171,20 @@ void UI_Handleing::_new_main_menu(GtkWidget* list)
 	GtkCellRenderer* rend_id = gtk_cell_renderer_text_new();
 	g_object_set(rend_id, "editable", FALSE, NULL);//not needed
 
-	g_signal_connect(G_OBJECT(rend__name), "edited", G_CALLBACK(cell_edited_callback), (gint*)NAME);
-	g_signal_connect(G_OBJECT(rend_rev), "edited", G_CALLBACK(cell_edited_callback), (gint*)REV);
-	g_signal_connect(G_OBJECT(rend_desc), "edited", G_CALLBACK(cell_edited_callback), (gint*)DESC);
+	g_signal_connect(G_OBJECT(rend__name), "edited", G_CALLBACK(cell_edited_callback), (gint*)Main::NAME);
+	g_signal_connect(G_OBJECT(rend_rev), "edited", G_CALLBACK(cell_edited_callback), (gint*)Main::REV);
+	g_signal_connect(G_OBJECT(rend_desc), "edited", G_CALLBACK(cell_edited_callback), (gint*)Main::DESC);
 
-	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Name", rend__name, "text", NAME, NULL);
+	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Name", rend__name, "text", Main::NAME, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("ID", rend_id, "text", ID, NULL);
+	column = gtk_tree_view_column_new_with_attributes("ID", rend_id, "text", Main::ID, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("Revision", rend_rev, "text", REV, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Revision", rend_rev, "text", Main::REV, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("Description", rend_desc, "text", DESC, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Description", rend_desc, "text", Main::DESC, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
-	_store_parts = gtk_tree_store_new(N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	_store_parts = gtk_tree_store_new((gint)Main::N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(_store_parts));
 	g_object_unref(_store_parts);
@@ -224,7 +224,7 @@ void UI_Handleing::_part_number_confirm(GtkButton* button, gpointer user_data)
 		repeat_flag = false;
 		while (valid) {
 			gchar* str_data;
-			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, ID, &str_data, -1);
+			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, Main::ID, &str_data, -1);
 
 			if (part_number == std::string(str_data)) {
 				repeat_flag = true;
@@ -253,7 +253,7 @@ void UI_Handleing::_selection_changed_main(GtkTreeSelection* selection, gpointer
 			GtkTreePath* indv_row = (GtkTreePath*)(a1->data);
 			gtk_tree_model_get_iter(GTK_TREE_MODEL(_store_parts), &iter, indv_row);
 			gchar* part_name, * part_id, * part_rev, * part_desc;
-			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
+			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, Main::NAME, &part_name, Main::ID, &part_id, Main::REV, &part_rev, Main::DESC, &part_desc, -1);
 			_selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, gtk_tree_row_reference_new(GTK_TREE_MODEL(_store_parts), indv_row)));
 		}
 	}
@@ -276,7 +276,7 @@ void UI_Handleing::_generate_new_part_number(GtkButton* button, gpointer user_da
 		repeat_flag = false;
 		while (valid) {
 			gchar* str_data;
-			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, ID, &str_data, -1);
+			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, Main::ID, &str_data, -1);
 
 			if (part_number == std::string(str_data)) {
 				repeat_flag = true;
@@ -369,7 +369,7 @@ void UI_Handleing::_delete_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 		GtkTreePath* indv_row = gtk_tree_row_reference_get_path(indv_part.row_ref());
 		gtk_tree_model_get_iter(GTK_TREE_MODEL(_store_parts), &iter, indv_row);
 
-		gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, NAME, &part_name, ID, &part_id, REV, &part_rev, DESC, &part_desc, -1);
+		gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, Main::NAME, &part_name, Main::ID, &part_id, Main::REV, &part_rev, Main::DESC, &part_desc, -1);
 		g_print("Deleting: %s %s %s %s, %d\n", part_name, part_id, part_rev, part_desc, _selected_part_list.size());
 
 		gtk_tree_store_remove(_store_parts, &iter);

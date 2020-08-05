@@ -49,7 +49,7 @@ void ConfigWindow::_new_config_window()
 
 	g_signal_connect(G_OBJECT(rend_edit), "edited", G_CALLBACK(cell_edited_callback), this);
 
-	_column = gtk_tree_view_column_new_with_attributes("Name", rend_edit, "text", NAME_CON, NULL);
+	_column = gtk_tree_view_column_new_with_attributes("Name", rend_edit, "text", Con::NAME, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(config_list), _column);
 
 	if (_file_location) {
@@ -59,7 +59,7 @@ void ConfigWindow::_new_config_window()
 		g_signal_connect(G_OBJECT(add_row), "clicked", G_CALLBACK(_add_clicked), this);
 	}
 
-	_store = gtk_tree_store_new(N_COLUMNS_CON, G_TYPE_STRING);
+	_store = gtk_tree_store_new((gint)Con::N_COLUMNS, G_TYPE_STRING);
 
 	File_Interfacer file;
 	std::vector<std::string> buffer;
@@ -72,7 +72,7 @@ void ConfigWindow::_new_config_window()
 	for (auto line : buffer) {
 		GtkTreeIter iter;
 		gtk_tree_store_append(_store, &iter, NULL);
-		gtk_tree_store_set(_store, &iter, NAME_CON, line.c_str(), -1);
+		gtk_tree_store_set(_store, &iter, Con::NAME, line.c_str(), -1);
 	}
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(config_list), GTK_TREE_MODEL(_store));
@@ -98,7 +98,7 @@ void ConfigWindow::cell_edited_callback(GtkCellRendererText* cell, gchar* path_s
 	ConfigWindow* class_ref = (ConfigWindow*)user_data;
 	GtkTreeIter iter_rawModel;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(class_ref->_store), &iter_rawModel, path_string);
-	gtk_tree_store_set(class_ref->_store, &iter_rawModel, NAME_CON, new_text, -1);
+	gtk_tree_store_set(class_ref->_store, &iter_rawModel, Con::NAME, new_text, -1);
 }
 
 void ConfigWindow::_selection_changed_config(GtkTreeSelection* selection, gpointer user_data)
@@ -114,7 +114,7 @@ void ConfigWindow::_selection_changed_config(GtkTreeSelection* selection, gpoint
 			GtkTreePath* indv_row = (GtkTreePath*)(a1->data);
 			gtk_tree_model_get_iter(GTK_TREE_MODEL(class_ref->_store), &iter, indv_row);
 			gchar* file_path;
-			gtk_tree_model_get(GTK_TREE_MODEL(class_ref->_store), &iter, NAME_CON, &file_path, -1);
+			gtk_tree_model_get(GTK_TREE_MODEL(class_ref->_store), &iter, Con::NAME, &file_path, -1);
 			class_ref->_row_refs.push_back(gtk_tree_row_reference_new(GTK_TREE_MODEL(class_ref->_store), indv_row));
 		}
 	}
@@ -125,7 +125,7 @@ void ConfigWindow::_add_clicked(GtkButton* button, gpointer user_data)
 	ConfigWindow* class_ref = (ConfigWindow*)user_data;
 	GtkTreeIter iter;
 	gtk_tree_store_append(class_ref->_store, &iter, NULL);
-	gtk_tree_store_set(class_ref->_store, &iter, NAME, "", -1);
+	gtk_tree_store_set(class_ref->_store, &iter, Con::NAME, "", -1);
 
 	gtk_tree_view_set_cursor_on_cell(GTK_TREE_VIEW(class_ref->config_list), gtk_tree_model_get_path(GTK_TREE_MODEL(class_ref->_store), &iter), class_ref->_column, NULL, TRUE);
 }
@@ -144,7 +144,7 @@ void ConfigWindow::_add_clicked_path(GtkButton* button, gpointer user_data)
 		char* filename;
 		GtkFileChooser* chooser = GTK_FILE_CHOOSER(native);
 		filename = gtk_file_chooser_get_filename(chooser);
-		gtk_tree_store_set(class_ref->_store, &iter, NAME, filename, -1);
+		gtk_tree_store_set(class_ref->_store, &iter, Con::NAME, filename, -1);
 		gtk_tree_view_set_cursor_on_cell(GTK_TREE_VIEW(class_ref->config_list), gtk_tree_model_get_path(GTK_TREE_MODEL(class_ref->_store), &iter), class_ref->_column, NULL, FALSE);
 		g_free(filename);
 	}

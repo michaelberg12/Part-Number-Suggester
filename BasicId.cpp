@@ -2,59 +2,167 @@
 
 BasicId::BasicId()
 {
+	_file_name = "";
+	_id = "";
+	_rev = "";
 }
 
 BasicId::BasicId(std::wstring file_name)
 {
-	id.assign(file_name.begin(), file_name.end());
+	_file_name = this->_wstr_to_str(file_name);
+	_parse();
+}
+
+BasicId::BasicId(std::string file_name)
+{
+	_file_name = file_name;
+	_parse();
 }
 
 std::string BasicId::to_str()
 {
-	return std::string();
+	return _id;
 }
 
 std::wstring BasicId::to_wstr()
 {
-	return std::wstring();
+	return this->_str_to_wstr(this->_id);
 }
 
 std::string BasicId::type()
 {
-	return std::string();
+	return std::string("BasicID");
 }
 
 std::string BasicId::rev_str()
 {
-	return std::string();
+	return _rev;
 }
 
 std::string BasicId::raw()
 {
-	return std::string();
+	return _file_name;
 }
 
 std::string BasicId::new_id(std::string rev)
 {
-	return std::string();
+	srand(time(0));
+	std::string return_id;
+	for (int a2 = 0; a2 < 5; a2++) {
+		return_id.append(std::to_string(rand() % 8 + 1));
+	}
+	return_id.insert(2, std::string(1, (char)(rand() % 26 + 65)));
+	std::string pre_rev = return_id;
+	return_id.append(rev);
+	//ensure that the revision is complient
+	if (this->valid(return_id)) {
+		return return_id;
+	}
+	return pre_rev;
 }
 
-bool BasicId::valid(std::wstring)
+bool BasicId::valid(std::wstring w_id)
 {
-	return false;
+	return valid(_wstr_to_str(w_id));
 }
 
-bool BasicId::valid(std::string)
+bool BasicId::valid(std::string id)
 {
-	return false;
+	printf("%s : %d ", id.c_str(), id.size());
+	if (id.size() < 6 || id.size() > 8) { return false; }
+	for (int a1 = 0; a1 < id.size(); a1++) {
+		int code = (int)id[a1];
+		printf("%d %d ", a1, code);
+		if (a1 == 2 || a1 == 6 || a1 == 7) {
+			//must be A->Z
+			if (65 > code || code > 90) { return false; }
+		}
+		else {
+			//must be 0->9
+			if (48 > code || code > 57) { return false; }
+		}
+
+	}
+	return true;
 }
 
 bool BasicId::valid()
 {
-	return false;
+	return this->valid(this->_id);
 }
 
 int BasicId::size()
 {
-	return 0;
+	return (_id.size() + _rev.size());
+}
+
+void BasicId::operator=(const BasicId& b_id)
+{
+	this->_file_name = b_id._file_name;
+	this->_id = b_id._id;
+	this->_rev = b_id._rev;
+}
+
+bool BasicId::operator==(const BasicId& b_id)
+{
+	return (this->_id == b_id._id && this->_rev == b_id._rev);
+}
+
+std::string BasicId::_wstr_to_str(std::wstring w_string)
+{
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	return converter.to_bytes(w_string);
+}
+
+std::wstring BasicId::_str_to_wstr(std::string n_string)
+{
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	return converter.from_bytes(n_string);
+}
+
+void BasicId::_parse()
+{
+	bool exstension_flag = false;
+	for (auto a1 = _file_name.rbegin(); a1 != _file_name.rend(); a1++) {
+		if (*a1 == '.') {
+			exstension_flag = true;
+			std::string file_id, file_exstention;
+			//assign the file exstension string from the last . to the end
+			file_exstention.assign(_file_name.rbegin(), a1);
+			std::reverse(file_exstention.begin(), file_exstention.end());
+
+			//assign the file name
+			file_id.assign(a1 + 1, _file_name.rend());
+			std::reverse(file_id.begin(), file_id.end());
+
+			//check to see if this is a basic ID
+			if (this->valid(file_id)) {
+				this->_id = file_id;
+				//file conforms to standards
+				if (file_id.size() <= 7) {
+					//conforms and contains revision
+					this->_rev.assign(file_id.begin() + 6, file_id.end());
+				}
+				else if (file_id.size() == 6) {
+					//conforms
+					this->_rev = "";
+				}
+			}
+			else {
+				//non conforming files
+				this->_rev = "";
+				this->_id = "";
+			}
+			break;
+		}
+	}
+	if (!exstension_flag && this->valid(this->_file_name)) {
+		//no file exstension
+		this->_rev = "";
+		this->_id = this->_file_name;
+	}
+	else if (!exstension_flag) {
+		this->_rev = "";
+		this->_id = "";
+	}
 }

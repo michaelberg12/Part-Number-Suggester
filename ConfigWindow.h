@@ -12,6 +12,7 @@
 #include <cmath>
 #include "FileData.h"
 #include "File_interfacer.h"
+#include "Enums.h"
 
 class ConfigWindow
 {
