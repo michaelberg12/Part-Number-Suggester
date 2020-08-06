@@ -32,7 +32,6 @@ private:
 	bool _selection_disable_flag;
 
 	GtkWidget* _main_window;
-	GtkWidget* _part_window;
 	GtkWidget* _type_config_window;
 	GtkWidget* _loc_config_window;
 

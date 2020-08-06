@@ -68,11 +68,9 @@ bool BasicId::valid(std::wstring w_id)
 
 bool BasicId::valid(std::string id)
 {
-	printf("%s : %d ", id.c_str(), id.size());
 	if (id.size() < 6 || id.size() > 8) { return false; }
 	for (int a1 = 0; a1 < id.size(); a1++) {
 		int code = (int)id[a1];
-		printf("%d %d ", a1, code);
 		if (a1 == 2 || a1 == 6 || a1 == 7) {
 			//must be A->Z
 			if (65 > code || code > 90) { return false; }

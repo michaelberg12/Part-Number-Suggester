@@ -45,7 +45,7 @@ void MainWindow::_new_main_window()
 	gtk_menu_shell_append(GTK_MENU_SHELL(configure_menu), config_loc);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), configure_menu_label);
 
-	g_signal_connect(G_OBJECT(new_part), "activate", G_CALLBACK(_new_menu_item), _part_window);
+	g_signal_connect(G_OBJECT(new_part), "activate", G_CALLBACK(_new_menu_item), NULL);
 	g_signal_connect(G_OBJECT(delete_part), "activate", G_CALLBACK(_delete_menu_item), this);
 	g_signal_connect(G_OBJECT(config_loc), "activate", G_CALLBACK(_config_menu_loc), _loc_config_window);
 	g_signal_connect(G_OBJECT(config_types), "activate", G_CALLBACK(_config_menu_type), _type_config_window);
@@ -59,7 +59,6 @@ void MainWindow::_new_main_window()
 
 	g_signal_connect(_main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-	gtk_window_set_transient_for(GTK_WINDOW(_part_window), GTK_WINDOW(_main_window));
 	gtk_window_set_transient_for(GTK_WINDOW(_type_config_window), GTK_WINDOW(_main_window));
 	gtk_window_set_transient_for(GTK_WINDOW(_loc_config_window), GTK_WINDOW(_main_window));
 
@@ -192,8 +191,9 @@ std::vector<Part> MainWindow::_parse_files(std::vector<WIN32_FIND_DATA> files_da
 
 void MainWindow::_new_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 {
-	GtkWidget* display_window = (GtkWidget*)user_data;
-	gtk_widget_show_all(display_window);
+	BasicId id;
+	NewPartWindow part_window(id.new_id(""));
+	gtk_widget_show_all(part_window.window());
 }
 
 void MainWindow::_delete_menu_item(GtkMenuItem* menuitem, gpointer user_data)

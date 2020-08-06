@@ -22,6 +22,6 @@ private:
 	void _new_part_creation_menu(GtkWidget* vertical_box);
 
 	static void _part_number_confirm(GtkButton* button, gpointer user_data);
-	static void _generate_new_part_number(GtkButton* button, gpointer user_data);
+	static void close_window(GtkButton* button, gpointer user_data);
 };
 

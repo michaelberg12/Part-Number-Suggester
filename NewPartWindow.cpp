@@ -27,8 +27,6 @@ void NewPartWindow::_new_part_window()
 	gtk_window_set_default_size(GTK_WINDOW(_part_window), 300, 400);
 	gtk_window_set_resizable(GTK_WINDOW(_part_window), FALSE);
 	gtk_window_set_title(GTK_WINDOW(_part_window), "Part Number Manager");
-
-	gtk_window_set_destroy_with_parent(GTK_WINDOW(_part_window), TRUE);
 }
 
 void NewPartWindow::_new_part_creation_menu(GtkWidget* vertical_box)
@@ -69,19 +67,19 @@ void NewPartWindow::_new_part_creation_menu(GtkWidget* vertical_box)
 
 	gtk_box_pack_end(GTK_BOX(vertical_box), confirm_box, FALSE, FALSE, 10);
 
-	g_signal_connect(_part_window, "destroy", G_CALLBACK(_part_number_confirm), this);
-	g_signal_connect(G_OBJECT(number_confirm), "clicked", G_CALLBACK(_part_number_confirm), this);
-	g_signal_connect(G_OBJECT(cancel_part), "clicked", G_CALLBACK(_generate_new_part_number), this);
+	g_signal_connect(_part_window, "destroy", G_CALLBACK(close_window), this->_part_window);
+	g_signal_connect(G_OBJECT(number_confirm), "clicked", G_CALLBACK(_part_number_confirm), this->_part_window);
+	g_signal_connect(G_OBJECT(cancel_part), "clicked", G_CALLBACK(close_window), this->_part_window);
 }
 
 void NewPartWindow::_part_number_confirm(GtkButton* button, gpointer user_data)
 {
-	NewPartWindow* class_ref = (NewPartWindow*)user_data;
-	gtk_widget_hide(class_ref->_part_window);
+	GtkWidget* window = (GtkWidget*)user_data;
+	gtk_widget_hide(window);
 }
 
-void NewPartWindow::_generate_new_part_number(GtkButton* button, gpointer user_data)
+void NewPartWindow::close_window(GtkButton* button, gpointer user_data)
 {
-	NewPartWindow* class_ref = (NewPartWindow*)user_data;
-	gtk_widget_hide(class_ref->_part_window);
+	GtkWidget* window = (GtkWidget*)user_data;
+	gtk_widget_hide(window);
 }
