@@ -2,10 +2,12 @@
 
 #include "UI_Handleing.h"
 
-MainWindow::MainWindow(GtkWidget* file_type, GtkWidget* file_loc)
+MainWindow::MainWindow(GtkWidget* file_type, GtkWidget* file_loc, GtkWidget* part_window)
 {
+	_part_window = part_window;
 	_type_config_window = file_type;
 	_loc_config_window = file_loc;
+
 	_window_creation();
 	_new_main_window();
 }
@@ -57,6 +59,10 @@ void MainWindow::_new_main_window()
 	gtk_container_add(GTK_CONTAINER(scrollable_list), part_list);
 
 	g_signal_connect(_main_window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+	gtk_window_set_transient_for(GTK_WINDOW(_part_window), GTK_WINDOW(_main_window));
+	gtk_window_set_transient_for(GTK_WINDOW(_type_config_window), GTK_WINDOW(_main_window));
+	gtk_window_set_transient_for(GTK_WINDOW(_loc_config_window), GTK_WINDOW(_main_window));
 
 	_new_main_menu(part_list);
 

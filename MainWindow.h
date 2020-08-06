@@ -18,7 +18,7 @@
 class MainWindow
 {
 public:
-	MainWindow(GtkWidget* file_type, GtkWidget* file_loc);
+	MainWindow(GtkWidget* file_type, GtkWidget* file_loc, GtkWidget* part_window);
 
 	GtkWidget* window();
 private:

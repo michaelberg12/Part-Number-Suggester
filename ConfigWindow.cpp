@@ -25,7 +25,6 @@ void ConfigWindow::_new_config_window()
 	GtkWidget* add_del_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_pack_end(GTK_BOX(add_del_box), add_row, FALSE, FALSE, 0);
 	gtk_box_pack_end(GTK_BOX(add_del_box), delete_row, FALSE, FALSE, 0);
-
 	
 	g_signal_connect(G_OBJECT(delete_row), "clicked", G_CALLBACK(_remove_clicked), this);
 
