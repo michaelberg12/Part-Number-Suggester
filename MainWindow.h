@@ -13,12 +13,13 @@
 #include "FileData.h"
 #include "File_interfacer.h"
 #include "ConfigWindow.h"
+#include "NewPartWindow.h"
 #include "Enums.h"
 
 class MainWindow
 {
 public:
-	MainWindow(GtkWidget* file_type, GtkWidget* file_loc, GtkWidget* part_window);
+	MainWindow(GtkWidget* file_type, GtkWidget* file_loc);
 
 	GtkWidget* window();
 private:

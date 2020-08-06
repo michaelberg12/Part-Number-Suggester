@@ -48,9 +48,7 @@ private:
 	static void _new_part_creation_menu(GtkWidget* grid);
 	void _new_main_menu(GtkWidget* grid);
 
-	static void _part_number_confirm(GtkButton* button, gpointer user_data);
 	static void _selection_changed_main(GtkTreeSelection* selection, gpointer data);
-	static void _generate_new_part_number(GtkButton* button, gpointer user_data);
 
 	static std::vector<Part> _parse_files(std::vector<WIN32_FIND_DATA> files_data);
 	static void _new_menu_item(GtkMenuItem* menuitem, gpointer user_data);

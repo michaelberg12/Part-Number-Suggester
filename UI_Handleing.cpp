@@ -93,73 +93,6 @@ void UI_Handleing::_new_main_window()
 	gtk_window_set_title(GTK_WINDOW(_main_window), "Part Number Manager");
 }
 
-void UI_Handleing::_new_part_window()
-{
-	GtkWidget* vert_main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-	gtk_container_add(GTK_CONTAINER(_part_window), vert_main_box);
-
-	g_signal_connect(_part_window, "destroy", G_CALLBACK(_part_number_confirm), NULL);
-	_new_part_creation_menu(vert_main_box);
-
-	gtk_window_set_position(GTK_WINDOW(_part_window), GTK_WIN_POS_CENTER);
-	gtk_window_set_default_size(GTK_WINDOW(_part_window), 300, 400);
-	gtk_window_set_resizable(GTK_WINDOW(_part_window), FALSE);
-	gtk_window_set_title(GTK_WINDOW(_part_window), "Part Number Manager");
-
-	gtk_window_set_transient_for(GTK_WINDOW(_part_window), GTK_WINDOW(_main_window));
-	gtk_window_set_destroy_with_parent(GTK_WINDOW(_part_window), TRUE);
-}
-
-void UI_Handleing::_new_part_creation_menu(GtkWidget* vertical_box)
-{
-	std::string part_number, temp_holder;
-	for (int a2 = 0; a2 < 5; a2++) {
-		part_number.append(std::to_string(rand() % 8 + 1));
-	}
-	part_number.insert(2, std::string(1, (char)(rand() % 26 + 65)));
-	temp_holder = part_number;
-	part_number.insert(0, "<span size=\"50000\">");
-	part_number.append("</span>");
-	//============================= part number ui elements ===================================
-	GtkWidget* part_number_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-	GtkWidget* part_number_label = gtk_label_new("");
-	GtkWidget* part_number_frame = gtk_frame_new("Part Number");
-	gtk_label_set_markup(GTK_LABEL(part_number_label), part_number.c_str());
-	gtk_container_add(GTK_CONTAINER(part_number_frame), part_number_label);
-	gtk_frame_set_label_align(GTK_FRAME(part_number_frame), 0.1, 0.5);
-	//gtk_box_pack_start(GTK_BOX(show_lidar_pos), label_show_lidar_pos, TRUE, FALSE, 20);
-	gtk_box_pack_start(GTK_BOX(part_number_box), part_number_frame, TRUE, FALSE, 20);
-	gtk_box_pack_start(GTK_BOX(vertical_box), part_number_box, TRUE, FALSE, 10);
-	//=========================================================================================
-
-
-	GtkWidget* part_name_frame = gtk_frame_new("Part Name");
-	_part_name_input = gtk_entry_new();
-	gtk_container_add(GTK_CONTAINER(part_name_frame), _part_name_input);
-	gtk_frame_set_label_align(GTK_FRAME(part_name_frame), 0.1, 0.5);
-
-	GtkWidget* part_desc_frame = gtk_frame_new("Part Description");
-	_part_desc_input = gtk_entry_new();
-	gtk_container_add(GTK_CONTAINER(part_desc_frame), _part_desc_input);
-	gtk_frame_set_label_align(GTK_FRAME(part_name_frame), 0.1, 0.5);
-
-	gtk_box_pack_start(GTK_BOX(vertical_box), part_name_frame, FALSE, FALSE, 10);
-	gtk_box_pack_start(GTK_BOX(vertical_box), part_desc_frame, FALSE, FALSE, 10);
-
-	_new_part = Part(gtk_entry_get_text(GTK_ENTRY(_part_name_input)), temp_holder, "A", gtk_entry_get_text(GTK_ENTRY(_part_name_input)));
-
-	GtkWidget* confirm_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-	GtkWidget* number_confirm = gtk_button_new_with_label("Use This Number");
-	GtkWidget* generate_new = gtk_button_new_with_label("Generate New");
-	gtk_box_pack_start(GTK_BOX(confirm_box), generate_new, TRUE, FALSE, 20);
-	gtk_box_pack_start(GTK_BOX(confirm_box), number_confirm, TRUE, FALSE, 20);
-
-	gtk_box_pack_end(GTK_BOX(vertical_box), confirm_box, FALSE, FALSE, 10);
-
-	g_signal_connect(G_OBJECT(number_confirm), "clicked", G_CALLBACK(_part_number_confirm), part_number_label);
-	g_signal_connect(G_OBJECT(generate_new), "clicked", G_CALLBACK(_generate_new_part_number), part_number_label);
-}
-
 void UI_Handleing::_new_main_menu(GtkWidget* list)
 {
 	GtkCellRenderer* rend__name = gtk_cell_renderer_text_new();
@@ -202,44 +135,6 @@ void UI_Handleing::_new_main_menu(GtkWidget* list)
 
 }
 
-void UI_Handleing::_part_number_confirm(GtkButton* button, gpointer user_data)
-{
-	_new_part = Part(gtk_entry_get_text(GTK_ENTRY(_part_name_input)), _new_part.id(), "A", gtk_entry_get_text(GTK_ENTRY(_part_desc_input)));
-
-	GtkTreeIter iter;
-	_new_part.part_list_append(GTK_TREE_STORE(_store_parts), &iter);
-	gtk_widget_hide(_part_window);
-
-	std::string part_number;
-	GtkWidget* part_number_label = (GtkWidget*)(user_data);
-	bool repeat_flag = true;
-	while (repeat_flag) {
-		for (int a2 = 0; a2 < 5; a2++) {
-			part_number.append(std::to_string(rand() % 8 + 1));
-		}
-		part_number.insert(2, std::string(1, (char)(rand() % 26 + 65)));
-		_new_part = Part(_new_part.name(), part_number, _new_part.rev(), _new_part.desc());
-
-		bool valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(_store_parts), &iter);
-		repeat_flag = false;
-		while (valid) {
-			gchar* str_data;
-			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, Main::ID, &str_data, -1);
-
-			if (part_number == std::string(str_data)) {
-				repeat_flag = true;
-				break;
-			}
-
-			g_free(str_data);
-			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(_store_parts), &iter);
-		}
-	}
-
-	part_number.insert(0, "<span size=\"50000\">");
-	part_number.append("</span>");
-	gtk_label_set_markup(GTK_LABEL(part_number_label), part_number.c_str());
-}
 
 void UI_Handleing::_selection_changed_main(GtkTreeSelection* selection, gpointer data)
 {
@@ -259,39 +154,7 @@ void UI_Handleing::_selection_changed_main(GtkTreeSelection* selection, gpointer
 	}
 }
 
-void UI_Handleing::_generate_new_part_number(GtkButton* button, gpointer user_data)
-{
-	std::string part_number;
-	GtkWidget* part_number_label = (GtkWidget*)(user_data);
-	bool repeat_flag = true;
-	while (repeat_flag) {
-		for (int a2 = 0; a2 < 5; a2++) {
-			part_number.append(std::to_string(rand() % 8 + 1));
-		}
-		part_number.insert(2, std::string(1, (char)(rand() % 26 + 65)));
-		_new_part = Part(_new_part.name(), part_number, _new_part.rev(), _new_part.desc());
 
-		GtkTreeIter iter;
-		bool valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(_store_parts), &iter);
-		repeat_flag = false;
-		while (valid) {
-			gchar* str_data;
-			gtk_tree_model_get(GTK_TREE_MODEL(_store_parts), &iter, Main::ID, &str_data, -1);
-
-			if (part_number == std::string(str_data)) {
-				repeat_flag = true;
-				break;
-			}
-
-			g_free(str_data);
-			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(_store_parts), &iter);
-		}
-	}
-	
-	part_number.insert(0, "<span size=\"50000\">");
-	part_number.append("</span>");
-	gtk_label_set_markup(GTK_LABEL(part_number_label), part_number.c_str());
-}
 
 std::vector<Part> UI_Handleing::_parse_files(std::vector<WIN32_FIND_DATA> files_data)
 {

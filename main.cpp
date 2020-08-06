@@ -13,14 +13,6 @@
 
 int main(int argc, char* argv[])
 {
-    BasicId test_id(L"11A111");
-    if (test_id.valid()) {
-        printf("True");
-    }
-    else {
-        printf("False");
-    }
-    
-    //UI_Handleing main_sim(argc, argv);
+    UI_Handleing main_sim(argc, argv);
     return 0;
 }

@@ -2,9 +2,8 @@
 
 #include "UI_Handleing.h"
 
-MainWindow::MainWindow(GtkWidget* file_type, GtkWidget* file_loc, GtkWidget* part_window)
+MainWindow::MainWindow(GtkWidget* file_type, GtkWidget* file_loc)
 {
-	_part_window = part_window;
 	_type_config_window = file_type;
 	_loc_config_window = file_loc;
 
