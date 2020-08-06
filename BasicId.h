@@ -13,7 +13,7 @@
 	37 - The 0 and 1 space are numbers from 0 -> 9 and is random      (R)
 	G - The 2 space is any letter from A -> Z (capital) and is random (R)
 	103 - The 3, 4, and 5 space are numbers from 0 -> 9 and is random (R)
-	AA - The 6 and 7 space are from A->Z and are not random
+	AA - The 6 and 7 space are from A->Z and is not random
 
 		The letters are incrimented in a base 26 fasion
 		The letters are all capital
@@ -39,6 +39,7 @@ public:
 	std::string type();
 	std::string rev_str();
 	std::string raw();
+	std::string raw_par();
 
 	//generate a new id
 	std::string new_id(std::string rev);
@@ -61,7 +62,10 @@ private:
 	void _parse();
 
 	std::string _file_name;
+	std::string _file_name_parsed;
+	std::string _exstension;
 	std::string _id;
 	std::string _rev;
+	
 };
 

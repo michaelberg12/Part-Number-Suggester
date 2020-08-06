@@ -2,26 +2,28 @@
 
 BasicId::BasicId()
 {
-	_file_name = "";
-	_id = "";
-	_rev = "";
+	this->_file_name = "";
+	this->_file_name_parsed = "";
+	this->_exstension = "";
+	this->_id = "";
+	this->_rev = "";
 }
 
 BasicId::BasicId(std::wstring file_name)
 {
-	_file_name = this->_wstr_to_str(file_name);
-	_parse();
+	this->_file_name = this->_wstr_to_str(file_name);
+	this->_parse();
 }
 
 BasicId::BasicId(std::string file_name)
 {
-	_file_name = file_name;
-	_parse();
+	this->_file_name = file_name;
+	this->_parse();
 }
 
 std::string BasicId::to_str()
 {
-	return _id;
+	return this->_id;
 }
 
 std::wstring BasicId::to_wstr()
@@ -36,12 +38,17 @@ std::string BasicId::type()
 
 std::string BasicId::rev_str()
 {
-	return _rev;
+	return this->_rev;
 }
 
 std::string BasicId::raw()
 {
-	return _file_name;
+	return this->_file_name;
+}
+
+std::string BasicId::raw_par()
+{
+	return this->_file_name_parsed;
 }
 
 std::string BasicId::new_id(std::string rev)
@@ -91,12 +98,14 @@ bool BasicId::valid()
 
 int BasicId::size()
 {
-	return (_id.size() + _rev.size());
+	return (this->_id.size() + this->_rev.size());
 }
 
 void BasicId::operator=(const BasicId& b_id)
 {
 	this->_file_name = b_id._file_name;
+	this->_file_name_parsed = b_id._file_name_parsed;
+	this->_exstension = b_id._exstension;
 	this->_id = b_id._id;
 	this->_rev = b_id._rev;
 }
@@ -134,10 +143,13 @@ void BasicId::_parse()
 			file_exstention.assign(_file_name.rbegin(), a1);
 			std::reverse(file_exstention.begin(), file_exstention.end());
 
+			this->_exstension = file_exstention;
 			//assign the file name
 			file_id.assign(a1 + 1, _file_name.rend());
 			std::reverse(file_id.begin(), file_id.end());
 
+			//the file name without the exstension
+			this->_file_name_parsed = file_id;
 			//check to see if this is a basic ID
 			if (this->valid(file_id)) {
 				this->_id.assign(_file_name.begin(), _file_name.begin() + 6);
@@ -160,12 +172,13 @@ void BasicId::_parse()
 		}
 	}
 	if (!exstension_flag && this->valid(this->_file_name)) {
+		this->_file_name_parsed = this->_file_name;
+		this->_exstension = "";
 		//id conforms to standards with no file exstension
 		this->_id.assign(_file_name.begin(), _file_name.begin() + 6);
 		if (_file_name.size() <= 8) {
 			//conforms and contains revision
 			this->_rev.assign(_file_name.begin() + 6, _file_name.end());
-			
 		}
 		else if (_file_name.size() == 6) {
 			//conforms
@@ -173,6 +186,8 @@ void BasicId::_parse()
 		}
 	}
 	else if (!exstension_flag) {
+		this->_exstension = "";
+		this->_file_name_parsed = this->_file_name;
 		this->_rev = "";
 		this->_id = "";
 	}

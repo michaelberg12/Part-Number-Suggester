@@ -45,7 +45,7 @@ void MainWindow::_new_main_window()
 	gtk_menu_shell_append(GTK_MENU_SHELL(configure_menu), config_loc);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), configure_menu_label);
 
-	g_signal_connect(G_OBJECT(new_part), "activate", G_CALLBACK(_new_menu_item), NULL);
+	g_signal_connect(G_OBJECT(new_part), "activate", G_CALLBACK(_new_menu_item), _store_parts);
 	g_signal_connect(G_OBJECT(delete_part), "activate", G_CALLBACK(_delete_menu_item), this);
 	g_signal_connect(G_OBJECT(config_loc), "activate", G_CALLBACK(_config_menu_loc), _loc_config_window);
 	g_signal_connect(G_OBJECT(config_types), "activate", G_CALLBACK(_config_menu_type), _type_config_window);
@@ -192,7 +192,28 @@ std::vector<Part> MainWindow::_parse_files(std::vector<WIN32_FIND_DATA> files_da
 void MainWindow::_new_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 {
 	BasicId id;
-	NewPartWindow part_window(id.new_id(""));
+	GtkTreeIter iter;
+	GtkTreeStore* store_parts = (GtkTreeStore*)user_data;
+
+	std::string part_number = id.new_id("");
+	GtkWidget* part_number_label = (GtkWidget*)(user_data);
+	bool repeat_flag = true;
+	while (repeat_flag) {
+		part_number = id.new_id("");
+		bool valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store_parts), &iter);
+		repeat_flag = false;
+		while (valid) {
+			gchar* str_data;
+			gtk_tree_model_get(GTK_TREE_MODEL(store_parts), &iter, Main::ID, &str_data, -1);
+			if (part_number == std::string(str_data)) {
+				repeat_flag = true;
+				break;
+			}
+			g_free(str_data);
+			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store_parts), &iter);
+		}
+	}
+	NewPartWindow part_window(part_number);
 	gtk_widget_show_all(part_window.window());
 }
 
