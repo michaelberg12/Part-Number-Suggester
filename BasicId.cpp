@@ -51,6 +51,11 @@ std::string BasicId::raw_par()
 	return this->_file_name_parsed;
 }
 
+std::string BasicId::ext()
+{
+	return this->_exstension;
+}
+
 std::string BasicId::new_id(std::string rev)
 {
 	srand(time(0));

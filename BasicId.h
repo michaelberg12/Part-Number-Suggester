@@ -40,6 +40,7 @@ public:
 	std::string rev_str();
 	std::string raw();
 	std::string raw_par();
+	std::string ext();
 
 	//generate a new id
 	std::string new_id(std::string rev);
