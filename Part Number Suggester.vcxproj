@@ -148,7 +148,6 @@
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="FileData.cpp" />
     <ClCompile Include="NewPartWindow.cpp" />
-    <ClCompile Include="UI_Handleing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicId.h" />
@@ -159,7 +158,6 @@
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="FileData.h" />
     <ClInclude Include="NewPartWindow.h" />
-    <ClInclude Include="UI_Handleing.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LocSave" />

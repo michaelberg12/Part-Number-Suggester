@@ -13,6 +13,24 @@
 
 int main(int argc, char* argv[])
 {
-    UI_Handleing main_sim(argc, argv);
+	gtk_init(&argc, &argv);
+
+	File_Interfacer gen();
+
+	ConfigWindow _location_config(true);
+	ConfigWindow _type_config(false);
+
+
+	GtkWidget* _dir_config_window = _location_config.window();
+	GtkWidget* _file_config_window = _type_config.window();
+
+	MainWindow _file_list(_dir_config_window, _file_config_window);
+	GtkWidget* _main_window = _file_list.window();
+
+	srand(time(0));
+
+	gtk_widget_show_all(_main_window);
+
+	gtk_main();
     return 0;
 }

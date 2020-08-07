@@ -106,9 +106,9 @@ void MainWindow::_new_main_menu(GtkWidget* list)
 	GtkCellRenderer* rend_id = gtk_cell_renderer_text_new();
 	g_object_set(rend_id, "editable", FALSE, NULL);//not needed
 
-	g_signal_connect(G_OBJECT(rend__name), "edited", G_CALLBACK(name_edited_callback), this);
-	g_signal_connect(G_OBJECT(rend_rev), "edited", G_CALLBACK(rev_edited_callback), this);
-	g_signal_connect(G_OBJECT(rend_desc), "edited", G_CALLBACK(desc_edited_callback), this);
+	g_signal_connect(G_OBJECT(rend__name), "edited", G_CALLBACK(_name_edited_callback), this);
+	g_signal_connect(G_OBJECT(rend_rev), "edited", G_CALLBACK(_rev_edited_callback), this);
+	g_signal_connect(G_OBJECT(rend_desc), "edited", G_CALLBACK(_desc_edited_callback), this);
 
 	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Name", rend__name, "text", Main::NAME, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
@@ -148,26 +148,24 @@ void MainWindow::_selection_changed_main(GtkTreeSelection* selection, gpointer u
 		{
 			GtkTreePath* indv_row = (GtkTreePath*)(a1->data);
 			gtk_tree_model_get_iter(GTK_TREE_MODEL(class_ref->_store_parts), &iter, indv_row);
-			gchar* part_name, * part_id, * part_rev, * part_desc;
-			gtk_tree_model_get(GTK_TREE_MODEL(class_ref->_store_parts), &iter, Main::NAME, &part_name, Main::ID, &part_id, Main::REV, &part_rev, Main::DESC, &part_desc, -1);
-			class_ref->_selected_part_list.push_back(Part(part_name, part_id, part_rev, part_desc, gtk_tree_row_reference_new(GTK_TREE_MODEL(class_ref->_store_parts), indv_row)));
+			class_ref->_row_refs.push_back(gtk_tree_row_reference_new(GTK_TREE_MODEL(class_ref->_store_parts), indv_row));
 		}
 	}
 }
 
-std::vector<Part> MainWindow::_parse_files(std::vector<WIN32_FIND_DATA> files_data)
+std::vector<FileData> MainWindow::_parse_files(std::vector<WIN32_FIND_DATA> files_data)
 {
 	File_Interfacer file;
-	std::vector<Part> return_value;
+	std::vector<FileData> return_value;
 	for (auto file_data : files_data) {
 		BasicId file_parser(std::wstring(file_data.cFileName));
 		for (auto file_exstension : file.load_file_type()) {
 			if (file_parser.ext() == file_exstension) {
 				if (file_parser.valid()) {
-					return_value.push_back(Part(file_parser.raw(), file_parser.to_str(), file_parser.rev_str(), ""));
+					return_value.push_back(FileData(file_parser.raw(), file_parser.to_str(), file_parser.rev_str(), ""));
 				}
 				else {
-					return_value.push_back(Part(file_parser.raw(), "", file_parser.rev_str(), ""));
+					return_value.push_back(FileData(file_parser.raw(), "", file_parser.rev_str(), ""));
 				}
 				break;
 			}
@@ -209,16 +207,10 @@ void MainWindow::_delete_menu_item(GtkMenuItem* button, gpointer user_data)
 	MainWindow* class_ref = (MainWindow*)user_data;
 	gtk_widget_hide(class_ref->_confirm_window);
 	class_ref->_selection_disable_flag = true;
-	for (auto indv_part : class_ref->_selected_part_list) {
+	for (auto indv_rows : class_ref->_row_refs) {
 		GtkTreeIter iter;
-		gchar* part_name, * part_id, * part_rev, * part_desc;
-
-		GtkTreePath* indv_row = gtk_tree_row_reference_get_path(indv_part.row_ref());
+		GtkTreePath* indv_row = gtk_tree_row_reference_get_path(indv_rows);
 		gtk_tree_model_get_iter(GTK_TREE_MODEL(class_ref->_store_parts), &iter, indv_row);
-
-		gtk_tree_model_get(GTK_TREE_MODEL(class_ref->_store_parts), &iter, Main::NAME, &part_name, Main::ID, &part_id, Main::REV, &part_rev, Main::DESC, &part_desc, -1);
-		g_print("Deleting: %s %s %s %s, %d\n", part_name, part_id, part_rev, part_desc, class_ref->_selected_part_list.size());
-
 		gtk_tree_store_remove(class_ref->_store_parts, &iter);
 	}
 	class_ref->_selection_disable_flag = false;
@@ -238,7 +230,7 @@ void MainWindow::_config_menu_type(GtkMenuItem* menuitem, gpointer user_data)
 	gtk_widget_show_all(display_window);
 }
 
-void MainWindow::name_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)
+void MainWindow::_name_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)
 {
 	MainWindow* class_ref = (MainWindow*)user_data;
 	GtkTreeIter iter;
@@ -246,7 +238,7 @@ void MainWindow::name_edited_callback(GtkCellRendererText* cell, gchar* path_str
 	gtk_tree_store_set(class_ref->_store_parts, &iter, Main::NAME, new_text, -1);
 }
 
-void MainWindow::rev_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)
+void MainWindow::_rev_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)
 {
 	MainWindow* class_ref = (MainWindow*)user_data;
 	GtkTreeIter iter_rawModel;
@@ -254,7 +246,7 @@ void MainWindow::rev_edited_callback(GtkCellRendererText* cell, gchar* path_stri
 	gtk_tree_store_set(class_ref->_store_parts, &iter_rawModel, Main::REV, new_text, -1);
 }
 
-void MainWindow::desc_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)
+void MainWindow::_desc_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)
 {
 	MainWindow* class_ref = (MainWindow*)user_data;
 	GtkTreeIter iter_rawModel;
@@ -274,7 +266,7 @@ void MainWindow::_delete_cancel(GtkButton* button, gpointer user_data)
 	gtk_widget_hide(window);
 }
 
-void MainWindow::_add_files(std::vector<Part> part_list)
+void MainWindow::_add_files(std::vector<FileData> part_list)
 {
 	std::vector<std::string> unique_id;
 	for (int a1 = 0; a1 < part_list.size(); a1++) {
@@ -298,7 +290,7 @@ void MainWindow::_add_files(std::vector<Part> part_list)
 		}
 		if (count > 1) {
 			//multiple files
-			Part id_header("", id_add, "", "Grouping of all files with the " + id_add + " id");
+			FileData id_header("", id_add, "", "Grouping of all files with the " + id_add + " id");
 			id_header.part_list_append(_store_parts, &iter);
 			for (auto file_child_add : part_list) {
 				if (file_child_add.id() == id_add) {

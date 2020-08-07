@@ -155,7 +155,6 @@ void ConfigWindow::_remove_clicked(GtkButton* button, gpointer user_data)
 {
 	ConfigWindow* class_ref = (ConfigWindow*)user_data;
 	class_ref->_selection_disable_flag = true;
-	g_print("Delete signal triggered\n\n");
 	for (auto indv_rows : class_ref->_row_refs) {
 		GtkTreeIter iter;
 		GtkTreePath* indv_row = gtk_tree_row_reference_get_path(indv_rows);
