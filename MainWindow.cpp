@@ -8,6 +8,7 @@ MainWindow::MainWindow(GtkWidget* file_type, GtkWidget* file_loc)
 
 	_window_creation();
 	_new_main_window();
+	_new_confirm_window();
 }
 
 GtkWidget* MainWindow::window()
@@ -18,6 +19,7 @@ GtkWidget* MainWindow::window()
 void MainWindow::_window_creation()
 {
 	_main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	_confirm_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 }
 
 void MainWindow::_new_main_window()
@@ -45,7 +47,7 @@ void MainWindow::_new_main_window()
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), configure_menu_label);
 
 	g_signal_connect(G_OBJECT(new_part), "activate", G_CALLBACK(_new_menu_item), _store_parts);
-	g_signal_connect(G_OBJECT(delete_part), "activate", G_CALLBACK(_delete_menu_item), this);
+	g_signal_connect(G_OBJECT(delete_part), "activate", G_CALLBACK(_delete_clicked), this);
 	g_signal_connect(G_OBJECT(config_loc), "activate", G_CALLBACK(_config_menu_loc), _loc_config_window);
 	g_signal_connect(G_OBJECT(config_types), "activate", G_CALLBACK(_config_menu_type), _type_config_window);
 
@@ -69,6 +71,30 @@ void MainWindow::_new_main_window()
 	gtk_window_set_title(GTK_WINDOW(_main_window), "Part Number Manager");
 }
 
+void MainWindow::_new_confirm_window() {
+	GtkWidget* main_window_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_container_add(GTK_CONTAINER(_confirm_window), main_window_box);
+
+	GtkWidget* confirm_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+	GtkWidget* confirm_delete = gtk_button_new_with_label("Delete");
+	GtkWidget* cancel_delete = gtk_button_new_with_label("Cancel");
+	gtk_box_pack_start(GTK_BOX(confirm_box), cancel_delete, TRUE, FALSE, 20);
+	gtk_box_pack_start(GTK_BOX(confirm_box), confirm_delete, TRUE, FALSE, 20);
+	gtk_box_pack_end(GTK_BOX(main_window_box), confirm_box, FALSE, FALSE, 10);
+	g_signal_connect(G_OBJECT(cancel_delete), "clicked", G_CALLBACK(_delete_cancel), _confirm_window);
+	g_signal_connect(G_OBJECT(confirm_delete), "clicked", G_CALLBACK(_delete_menu_item), this);
+
+	g_signal_connect(_confirm_window, "destroy", G_CALLBACK(_delete_cancel), _confirm_window);
+
+	GtkWidget* part_number_label = gtk_label_new("Confirm Delete?");
+	gtk_box_pack_start(GTK_BOX(main_window_box), part_number_label, TRUE, TRUE, 10);
+
+	gtk_window_set_position(GTK_WINDOW(_confirm_window), GTK_WIN_POS_CENTER);
+	gtk_window_set_default_size(GTK_WINDOW(_confirm_window), 200, 100);
+	gtk_window_set_resizable(GTK_WINDOW(_confirm_window), FALSE);
+	gtk_window_set_title(GTK_WINDOW(_confirm_window), "Confirm");
+}
+
 void MainWindow::_new_main_menu(GtkWidget* list)
 {
 	GtkCellRenderer* rend__name = gtk_cell_renderer_text_new();
@@ -80,9 +106,9 @@ void MainWindow::_new_main_menu(GtkWidget* list)
 	GtkCellRenderer* rend_id = gtk_cell_renderer_text_new();
 	g_object_set(rend_id, "editable", FALSE, NULL);//not needed
 
-	g_signal_connect(G_OBJECT(rend__name), "edited", G_CALLBACK(name_edited_callback), (gint*)Main::NAME);
-	g_signal_connect(G_OBJECT(rend_rev), "edited", G_CALLBACK(name_edited_callback), (gint*)Main::REV);
-	g_signal_connect(G_OBJECT(rend_desc), "edited", G_CALLBACK(name_edited_callback), (gint*)Main::DESC);
+	g_signal_connect(G_OBJECT(rend__name), "edited", G_CALLBACK(name_edited_callback), this);
+	g_signal_connect(G_OBJECT(rend_rev), "edited", G_CALLBACK(rev_edited_callback), this);
+	g_signal_connect(G_OBJECT(rend_desc), "edited", G_CALLBACK(desc_edited_callback), this);
 
 	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Name", rend__name, "text", Main::NAME, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
@@ -178,9 +204,10 @@ void MainWindow::_new_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 	gtk_widget_show_all(part_window.window());
 }
 
-void MainWindow::_delete_menu_item(GtkMenuItem* menuitem, gpointer user_data)
+void MainWindow::_delete_menu_item(GtkMenuItem* button, gpointer user_data)
 {
 	MainWindow* class_ref = (MainWindow*)user_data;
+	gtk_widget_hide(class_ref->_confirm_window);
 	class_ref->_selection_disable_flag = true;
 	for (auto indv_part : class_ref->_selected_part_list) {
 		GtkTreeIter iter;
@@ -214,9 +241,9 @@ void MainWindow::_config_menu_type(GtkMenuItem* menuitem, gpointer user_data)
 void MainWindow::name_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)
 {
 	MainWindow* class_ref = (MainWindow*)user_data;
-	GtkTreeIter iter_rawModel;
-	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(class_ref->_store_parts), &iter_rawModel, path_string);
-	gtk_tree_store_set(class_ref->_store_parts, &iter_rawModel, Main::NAME, new_text, -1);
+	GtkTreeIter iter;
+	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(class_ref->_store_parts), &iter, path_string);
+	gtk_tree_store_set(class_ref->_store_parts, &iter, Main::NAME, new_text, -1);
 }
 
 void MainWindow::rev_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data)
@@ -233,6 +260,18 @@ void MainWindow::desc_edited_callback(GtkCellRendererText* cell, gchar* path_str
 	GtkTreeIter iter_rawModel;
 	gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(class_ref->_store_parts), &iter_rawModel, path_string);
 	gtk_tree_store_set(class_ref->_store_parts, &iter_rawModel, Main::DESC, new_text, -1);
+}
+
+void MainWindow::_delete_clicked(GtkMenuItem* button, gpointer user_data)
+{
+	MainWindow* class_ref = (MainWindow*)user_data;
+	gtk_widget_show_all(class_ref->_confirm_window);
+}
+
+void MainWindow::_delete_cancel(GtkButton* button, gpointer user_data)
+{
+	GtkWidget* window = (GtkWidget*)user_data;
+	gtk_widget_hide(window);
 }
 
 void MainWindow::_add_files(std::vector<Part> part_list)

@@ -32,6 +32,7 @@ private:
 	bool _selection_disable_flag;
 
 	GtkWidget* _main_window;
+	GtkWidget* _confirm_window;
 	GtkWidget* _type_config_window;
 	GtkWidget* _loc_config_window;
 
@@ -39,6 +40,7 @@ private:
 
 	void _window_creation();
 	void _new_main_window();
+	void _new_confirm_window();
 
 	void _add_files(std::vector<Part> part_list);
 	void _new_main_menu(GtkWidget* list);
@@ -47,11 +49,13 @@ private:
 
 	static void _selection_changed_main(GtkTreeSelection* selection, gpointer user_data);
 	static void _new_menu_item(GtkMenuItem* menuitem, gpointer user_data);
-	static void _delete_menu_item(GtkMenuItem* menuitem, gpointer user_data);
+	static void _delete_menu_item(GtkMenuItem* button, gpointer user_data);
 	static void _config_menu_loc(GtkMenuItem* menuitem, gpointer user_data);
 	static void _config_menu_type(GtkMenuItem* menuitem, gpointer user_data);
 	static void name_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
 	static void rev_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
 	static void desc_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
+	static void _delete_clicked(GtkMenuItem* button, gpointer user_data);
+	static void _delete_cancel(GtkButton* button, gpointer user_data);
 };
 
