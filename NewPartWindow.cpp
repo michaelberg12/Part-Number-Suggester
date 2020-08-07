@@ -1,7 +1,8 @@
 #include "NewPartWindow.h"
 
-NewPartWindow::NewPartWindow(std::string new_id)
+NewPartWindow::NewPartWindow(std::string new_id, GtkTreeStore* file_store)
 {
+	this->_file_store = file_store;
 	this->_new_id = new_id;
 	_window_creation();
 	_new_part_window();
@@ -67,19 +68,22 @@ void NewPartWindow::_new_part_creation_menu(GtkWidget* vertical_box)
 
 	gtk_box_pack_end(GTK_BOX(vertical_box), confirm_box, FALSE, FALSE, 10);
 
-	g_signal_connect(_part_window, "destroy", G_CALLBACK(close_window), this->_part_window);
-	g_signal_connect(G_OBJECT(number_confirm), "clicked", G_CALLBACK(_part_number_confirm), this->_part_window);
-	g_signal_connect(G_OBJECT(cancel_part), "clicked", G_CALLBACK(close_window), this->_part_window);
+	g_signal_connect(_part_window, "destroy", G_CALLBACK(_close_window), this->_part_window);
+	g_signal_connect(G_OBJECT(number_confirm), "clicked", G_CALLBACK(_part_number_confirm), this);
+	g_signal_connect(G_OBJECT(cancel_part), "clicked", G_CALLBACK(_close_window), this->_part_window);
 }
 
 void NewPartWindow::_part_number_confirm(GtkButton* button, gpointer user_data)
 {
-	GtkWidget* window = (GtkWidget*)user_data;
-	gtk_widget_hide(window);
+	//add new part
+	NewPartWindow* class_ref = (NewPartWindow*)user_data;
+	
+	gtk_widget_hide(GTK_WIDGET(class_ref->_part_window));
 }
 
-void NewPartWindow::close_window(GtkButton* button, gpointer user_data)
+void NewPartWindow::_close_window(GtkButton* button, gpointer user_data)
 {
+	//don't add new part
 	GtkWidget* window = (GtkWidget*)user_data;
 	gtk_widget_hide(window);
 }

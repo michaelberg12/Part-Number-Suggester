@@ -45,7 +45,6 @@ private:
 	void _window_creation();
 	void _new_main_window();
 
-	static void _new_part_creation_menu(GtkWidget* grid);
 	void _new_main_menu(GtkWidget* grid);
 
 	static void _selection_changed_main(GtkTreeSelection* selection, gpointer data);
@@ -59,5 +58,4 @@ private:
 	static bool _verify_file_name(std::string file_name);
 	static void _add_files(std::vector<Part> part_list);
 
-	static void _new_part_window();
 };

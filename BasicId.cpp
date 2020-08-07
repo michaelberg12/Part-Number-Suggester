@@ -191,6 +191,7 @@ void BasicId::_parse()
 		}
 	}
 	else if (!exstension_flag) {
+		//id does not conforms to standards with no file exstension
 		this->_exstension = "";
 		this->_file_name_parsed = this->_file_name;
 		this->_rev = "";

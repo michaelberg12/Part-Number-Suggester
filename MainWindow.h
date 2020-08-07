@@ -40,7 +40,6 @@ private:
 	void _window_creation();
 	void _new_main_window();
 
-	bool _verify_file_name(std::string file_name);
 	void _add_files(std::vector<Part> part_list);
 	void _new_main_menu(GtkWidget* list);
 

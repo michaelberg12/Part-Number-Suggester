@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-
 #include "UI_Handleing.h"
 
 MainWindow::MainWindow(GtkWidget* file_type, GtkWidget* file_loc)
@@ -135,57 +134,19 @@ std::vector<Part> MainWindow::_parse_files(std::vector<WIN32_FIND_DATA> files_da
 	File_Interfacer file;
 	std::vector<Part> return_value;
 	for (auto file_data : files_data) {
-		std::wstring file_name = std::wstring(file_data.cFileName);
-		for (auto a1 = file_name.crbegin(); a1 != file_name.crend(); a1++) {
-			std::wstring file_name_modified, file_exstention;
-			if (*a1 == L'.') {
-				file_exstention.assign(file_name.crbegin(), a1);
-				std::reverse(file_exstention.begin(), file_exstention.end());
-				std::wcout << file_exstention << L" ";
-
-				std::vector<std::string> types = file.load_file_type();
-				for (auto type : types) {
-					std::wstring type_conv = std::wstring(type.begin(), type.end());
-					if (type_conv == file_exstention) {
-						file_name_modified.assign(a1 + 1, file_name.crend());
-						std::reverse(file_name_modified.begin(), file_name_modified.end());
-						std::wcout << file_name_modified << L" ";
-						std::string file_id = std::string(file_name_modified.begin(), file_name_modified.end());
-
-						if (_verify_file_name(file_id)) {
-							//file conforms to standards
-							if (file_id.size() == 7) {
-								//contains revision
-								std::string rev = std::string(1, file_id.back());
-								file_id.pop_back();
-								return_value.push_back(Part(file_id, file_id, rev, ""));
-							}
-							else if (file_id.size() == 6) {
-								//conforms
-								if (file_exstention == L"SLDDRW") {
-									return_value.push_back(Part(file_id, file_id, "DWG", ""));
-								}
-								else {
-									return_value.push_back(Part(file_id, file_id, "MC", ""));
-								}
-							}
-						}
-						else {
-							return_value.push_back(Part(file_id, "N/A", "", ""));
-							//non conforming files
-						}
-						std::wcout << type_conv << L"==" << file_name_modified << L" ";
-					}
-					else {
-						std::wcout << type_conv << L"!=" << file_name_modified << L" ";
-					}
+		BasicId file_parser(std::wstring(file_data.cFileName));
+		for (auto file_exstension : file.load_file_type()) {
+			if (file_parser.ext() == file_exstension) {
+				if (file_parser.valid()) {
+					return_value.push_back(Part(file_parser.raw(), file_parser.to_str(), file_parser.rev_str(), ""));
 				}
-				std::wcout << std::endl;
+				else {
+					return_value.push_back(Part(file_parser.raw(), "", file_parser.rev_str(), ""));
+				}
 				break;
 			}
 		}
 	}
-
 	return return_value;
 }
 
@@ -213,7 +174,7 @@ void MainWindow::_new_menu_item(GtkMenuItem* menuitem, gpointer user_data)
 			valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store_parts), &iter);
 		}
 	}
-	NewPartWindow part_window(part_number);
+	NewPartWindow part_window(part_number, store_parts);
 	gtk_widget_show_all(part_window.window());
 }
 
@@ -274,50 +235,42 @@ void MainWindow::desc_edited_callback(GtkCellRendererText* cell, gchar* path_str
 	gtk_tree_store_set(class_ref->_store_parts, &iter_rawModel, Main::DESC, new_text, -1);
 }
 
-bool MainWindow::_verify_file_name(std::string file_name)
-{
-	//id format must be 
-	//11A111
-	printf("%s : %d ", file_name.c_str(), file_name.size());
-	if (file_name.size() != 6 && file_name.size() != 7) { return false; }
-	for (int a1 = 0; a1 < file_name.size(); a1++) {
-		int code = (int)file_name[a1];
-		printf("%d %d ", a1, code);
-		if (a1 == 2) {
-			//must be A->Z
-			if (65 < code && code > 90) { return false; }
-		}
-		else if (a1 == 6) {
-			//must be A->Z
-			if (65 < code && code > 90) { return false; }
-		}
-		else {
-			//must be 0->9
-			if (48 < code && code > 57) { return false; }
-		}
-
-	}
-	return true;
-}
-
 void MainWindow::_add_files(std::vector<Part> part_list)
 {
-	std::vector<Part> master_list;
+	std::vector<std::string> unique_id;
 	for (int a1 = 0; a1 < part_list.size(); a1++) {
-		if (part_list[a1].rev() == "MC") {
-			master_list.push_back(part_list[a1]);
+		printf("%s %s %s\n", part_list[a1].name().c_str(), part_list[a1].id().c_str(), part_list[a1].rev().c_str());
+		if (part_list[a1].rev() == "" && part_list[a1].id() != "") {
+			unique_id.push_back(part_list[a1].id());
 		}
 	}
+	std::sort(unique_id.begin(), unique_id.end());
+	unique_id.erase(std::unique(unique_id.begin(), unique_id.end()), unique_id.end());
+
 	GtkTreeIter iter, child;
 
-	for (auto file_add : part_list) {
-		if (file_add.rev() == "MC") {
-			file_add.part_list_append(_store_parts, &iter);
+	for (auto id_add : unique_id) {
+		//determin if id has multiple files
+		int count = 0;
+		for (auto file_add : part_list) {
+			//iterate through part list and count
+			if (file_add.id() == id_add) { count++; }
+			if (count > 1) { break; }
+		}
+		if (count > 1) {
+			//multiple files
+			Part id_header("", id_add, "", "Grouping of all files with the " + id_add + " id");
+			id_header.part_list_append(_store_parts, &iter);
 			for (auto file_child_add : part_list) {
-				if (file_child_add.rev() != "MC" && file_child_add.id() == file_add.id()) {
+				if (file_child_add.id() == id_add) {
 					file_child_add.part_list_append(_store_parts, &iter, &child);
 				}
 			}
+		}
+	}
+	for (auto file_add : part_list) {
+		if (file_add.id() == "") {
+			file_add.part_list_append(_store_parts, &iter);
 		}
 	}
 }
