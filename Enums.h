@@ -11,5 +11,6 @@ enum class Main{
 	ID,
 	REV,
 	DESC,
+	LAST_EDITED,
 	N_COLUMNS
 };

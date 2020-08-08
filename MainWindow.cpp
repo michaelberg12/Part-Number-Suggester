@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include "UI_Handleing.h"
 
 MainWindow::MainWindow(GtkWidget* file_type, GtkWidget* file_loc)
 {
@@ -66,7 +65,7 @@ void MainWindow::_new_main_window()
 	_new_main_menu(part_list);
 
 	gtk_window_set_position(GTK_WINDOW(_main_window), GTK_WIN_POS_CENTER);
-	gtk_window_set_default_size(GTK_WINDOW(_main_window), 600, 600);
+	gtk_window_set_default_size(GTK_WINDOW(_main_window), 700, 600);
 	gtk_window_set_resizable(GTK_WINDOW(_main_window), TRUE);
 	gtk_window_set_title(GTK_WINDOW(_main_window), "Part Number Manager");
 }
@@ -105,6 +104,9 @@ void MainWindow::_new_main_menu(GtkWidget* list)
 	g_object_set(rend_desc, "editable", TRUE, NULL);
 	GtkCellRenderer* rend_id = gtk_cell_renderer_text_new();
 	g_object_set(rend_id, "editable", FALSE, NULL);//not needed
+	GtkCellRenderer* rend_edited = gtk_cell_renderer_text_new();
+	g_object_set(rend_id, "editable", FALSE, NULL);//not needed
+
 
 	g_signal_connect(G_OBJECT(rend__name), "edited", G_CALLBACK(_name_edited_callback), this);
 	g_signal_connect(G_OBJECT(rend_rev), "edited", G_CALLBACK(_rev_edited_callback), this);
@@ -118,8 +120,10 @@ void MainWindow::_new_main_menu(GtkWidget* list)
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 	column = gtk_tree_view_column_new_with_attributes("Description", rend_desc, "text", Main::DESC, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
+	column = gtk_tree_view_column_new_with_attributes("Last Accessed", rend_desc, "text", Main::LAST_EDITED, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
-	_store_parts = gtk_tree_store_new((gint)Main::N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	_store_parts = gtk_tree_store_new((gint)Main::N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(_store_parts));
 	g_object_unref(_store_parts);
