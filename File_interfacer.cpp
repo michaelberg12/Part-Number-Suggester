@@ -3,12 +3,11 @@
 File_Interfacer::File_Interfacer()
 {
     
-
 }
 
-std::vector<WIN32_FIND_DATA> File_Interfacer::find_files(LPCWSTR file_location, int level)
+std::vector<FileData> File_Interfacer::find_files(LPCWSTR file_location, int level)
 {
-    std::vector<WIN32_FIND_DATA> return_value;
+    std::vector<FileData> return_value;
     WIN32_FIND_DATA file;
     HANDLE search_handle = FindFirstFile(file_location, &file);
     if (search_handle)
@@ -23,29 +22,27 @@ std::vector<WIN32_FIND_DATA> File_Interfacer::find_files(LPCWSTR file_location, 
                     file_path.pop_back();
                     std::wcout << "D: " << file.cFileName;
                     std::wcout << " S: " << (file_path + file_name + L"\\*") << std::endl;
-                    std::vector<WIN32_FIND_DATA> found_files = find_files((file_path + file_name + L"\\*").c_str(), level + 1);
+                    std::vector<FileData> found_files = find_files((file_path + file_name + L"\\*").c_str(), level + 1);
                     return_value.insert(return_value.end(), found_files.begin(), found_files.end());
                 }
             }
             else if (file.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE) {
-                return_value.push_back(file);
+                std::wstring file_path = std::wstring(file_location);
+                file_path.pop_back();
+                FileData single_file(file, file_path);
+                return_value.push_back(single_file);
                 for (int a1 = 0; a1 < level; a1++) { printf("   "); }
                 std::wcout << file.cFileName << std::endl;
             }
-
         } while (FindNextFile(search_handle, &file));
         FindClose(search_handle);
     }
     return return_value;
 }
 
-void File_Interfacer::save_main(std::vector<FileData> part_list)
+void File_Interfacer::save_main(std::vector<std::string> file_main)
 {
-    std::vector<std::string> input;
-    for (auto part : part_list) {
-        input.push_back(part.save_string());
-    }
-    this->_save("PartSave", input);
+    this->_save("PartSave", file_main);
 }
 
 void File_Interfacer::save_file_loc(std::vector<std::string> file_loc)
@@ -64,7 +61,7 @@ std::vector<FileData> File_Interfacer::load_main()
     std::vector<std::string> loaded_lines = this->_load("PartSave");
     for (auto line : loaded_lines) {
         std::vector<std::string> buffer;
-        boost::split(buffer, line, boost::is_any_of(" "));
+        boost::split(buffer, line, boost::is_any_of(","));
         if (buffer.size() >= 4){
             return_value.push_back(FileData(buffer[0], buffer[1], buffer[2], buffer[3]));
         }

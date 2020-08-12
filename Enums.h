@@ -12,5 +12,6 @@ enum class Main{
 	REV,
 	DESC,
 	LAST_EDITED,
+	LOC,
 	N_COLUMNS
 };

@@ -58,5 +58,7 @@ private:
 	static void _desc_edited_callback(GtkCellRendererText* cell, gchar* path_string, gchar* new_text, gpointer user_data);
 	static void _delete_clicked(GtkMenuItem* button, gpointer user_data);
 	static void _delete_cancel(GtkButton* button, gpointer user_data);
+	static void _update_save(GtkTreeModel* tree_model, gpointer user_data);
+	static gboolean _to_string_vector(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer data);
 };
 

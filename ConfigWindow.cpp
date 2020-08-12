@@ -108,8 +108,7 @@ void ConfigWindow::_selection_changed_config(GtkTreeSelection* selection, gpoint
 		class_ref->_row_refs.clear();
 		g_list_free_full(class_ref->_list, (GDestroyNotify)gtk_tree_path_free);
 		class_ref->_list = gtk_tree_selection_get_selected_rows(selection, NULL);
-		for (GList* a1 = class_ref->_list; a1 != NULL; a1 = a1->next)
-		{
+		for (GList* a1 = class_ref->_list; a1 != NULL; a1 = a1->next){
 			GtkTreePath* indv_row = (GtkTreePath*)(a1->data);
 			gtk_tree_model_get_iter(GTK_TREE_MODEL(class_ref->_store), &iter, indv_row);
 			gchar* file_path;

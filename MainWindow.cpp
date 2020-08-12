@@ -105,7 +105,9 @@ void MainWindow::_new_main_menu(GtkWidget* list)
 	GtkCellRenderer* rend_id = gtk_cell_renderer_text_new();
 	g_object_set(rend_id, "editable", FALSE, NULL);//not needed
 	GtkCellRenderer* rend_edited = gtk_cell_renderer_text_new();
-	g_object_set(rend_id, "editable", FALSE, NULL);//not needed
+	g_object_set(rend_edited, "editable", FALSE, NULL);//not needed
+	GtkCellRenderer* rend_loc = gtk_cell_renderer_text_new();
+	g_object_set(rend_loc, "editable", FALSE, NULL);//not needed
 
 
 	g_signal_connect(G_OBJECT(rend__name), "edited", G_CALLBACK(_name_edited_callback), this);
@@ -120,10 +122,12 @@ void MainWindow::_new_main_menu(GtkWidget* list)
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 	column = gtk_tree_view_column_new_with_attributes("Description", rend_desc, "text", Main::DESC, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
-	column = gtk_tree_view_column_new_with_attributes("Last Accessed", rend_desc, "text", Main::LAST_EDITED, NULL);
+	column = gtk_tree_view_column_new_with_attributes("Last Accessed", rend_edited, "text", Main::LAST_EDITED, NULL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
+	column = gtk_tree_view_column_new_with_attributes("File Location", rend_loc, "text", Main::LOC, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(list), column);
 
-	_store_parts = gtk_tree_store_new((gint)Main::N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	_store_parts = gtk_tree_store_new((gint)Main::N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(list), GTK_TREE_MODEL(_store_parts));
 	g_object_unref(_store_parts);
@@ -134,10 +138,11 @@ void MainWindow::_new_main_menu(GtkWidget* list)
 		location.append("\\*");
 		//g_print("%s\n", (LPCWSTR)location.c_str());
 		std::wstring wide_s = std::wstring(location.begin(), location.end());
-		files_data = file.find_files(wide_s.c_str(), 0);
-		_add_files(_parse_files(files_data));
+		//files_data = file.find_files(wide_s.c_str(), 0);
+		_add_files(file.find_files(wide_s.c_str(), 0));
 	}
-
+	
+	_update_save(GTK_TREE_MODEL(this->_store_parts), this);
 }
 
 void MainWindow::_selection_changed_main(GtkTreeSelection* selection, gpointer user_data)
@@ -272,9 +277,24 @@ void MainWindow::_delete_cancel(GtkButton* button, gpointer user_data)
 
 void MainWindow::_add_files(std::vector<FileData> part_list)
 {
+	
+	File_Interfacer file;
+	std::vector<std::string> file_ext = file.load_file_type();
+	for (int a1 = 0; a1 < part_list.size(); a1++) {
+		bool ext_match_flag = false;
+		for (int a2 = 0; a2 < file_ext.size(); a2++) {
+			if (part_list[a1].ext() == file_ext[a2]) {
+				ext_match_flag = true;
+			}
+		}
+		if (!ext_match_flag) {
+			part_list.erase(part_list.begin() + a1);
+			a1 = 0;
+		}
+	}
+
 	std::vector<std::string> unique_id;
 	for (int a1 = 0; a1 < part_list.size(); a1++) {
-		printf("%s %s %s\n", part_list[a1].name().c_str(), part_list[a1].id().c_str(), part_list[a1].rev().c_str());
 		if (part_list[a1].rev() == "" && part_list[a1].id() != "") {
 			unique_id.push_back(part_list[a1].id());
 		}
@@ -310,3 +330,24 @@ void MainWindow::_add_files(std::vector<FileData> part_list)
 	}
 }
 
+void MainWindow::_update_save(GtkTreeModel* tree_model, gpointer user_data)
+{
+	File_Interfacer file;
+	MainWindow* class_ref = (MainWindow*)user_data;
+	std::vector<std::string> buffer;
+	gtk_tree_model_foreach(GTK_TREE_MODEL(class_ref->_store_parts), _to_string_vector, &buffer);
+	file.save_main(buffer);
+}
+
+gboolean MainWindow::_to_string_vector(GtkTreeModel* model, GtkTreePath* path, GtkTreeIter* iter, gpointer data)
+{
+	gchar* name, * rev, * desc, * loc;
+	std::vector<std::string>* buffer = (std::vector<std::string>*)data;
+
+	gtk_tree_model_get(model, iter, Main::NAME, &name, Main::REV, &rev, Main::DESC, &desc, Main::LOC, &loc, -1);
+	std::string save_string = (std::string(name) + "," + std::string(rev) + "," + std::string(desc) + "," + std::string(loc));
+	buffer->push_back(save_string);
+	g_free(name); g_free(rev); g_free(desc); g_free(loc);
+
+	return FALSE;
+}
